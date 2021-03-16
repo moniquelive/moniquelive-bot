@@ -1,0 +1,40 @@
+[
+  {
+    "actions": [
+      "!youtube",
+      "!yt"
+    ],
+    "color": "yellowgreen",
+    "response": "/me playlist com os vídeos passados: https://www.youtube.com/playlist?list=PLyR9xTdgYCd9n4V5EK86aEqMd59QZeDD9"
+  },
+  {
+    "actions": [
+      "!cybervox",
+      "!vox"
+    ],
+    "color": "yellowgreen",
+    "response": "/me clique neste link no seu celular para falar com o robô: https://wa.me/5521982820415?text=%23mandaaudios&lang=pt_br"
+  },
+  {
+    "actions": [
+      "!github",
+      "!gh"
+    ],
+    "color": "yellowgreen",
+    "response": "/me clique neste link para ver nossos projetinhos: https://github.com/moniquelive"
+  },
+  {
+    "actions": [
+      "!meme"
+    ],
+    "color": "yellowgreen",
+    "response": "/me clique neste link para ver nosso gerador de memes: https://meme.monique.dev"
+  },
+  {
+    "actions": [
+      "!roster"
+    ],
+    "color": "blue",
+    "response": "/me {{ len .Roster }}"
+  }
+]
