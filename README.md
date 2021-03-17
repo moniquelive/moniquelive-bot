@@ -19,3 +19,4 @@
 - [x] bookmarks (!youtube/!yt,!cybervox/!vox,!github/!gh)
 - [x] extrair comandos para .json
 - [x] usar template para fazer comandos dinamicos
+- [x] chamar funções GO pelo template (comando !rainbow)
