@@ -45,7 +45,6 @@ func main() {
 
 	client.OnConnect(func() {
 		log.Println("OnConnect") // OnConnect attach callback to when a connection has been established
-		//rainbow(client)
 		client.Say(channel, "/color seagreen")
 		client.Say(channel, "/me Tô na área!")
 		client.Say(channel, "/slow 1")
@@ -87,13 +86,17 @@ func main() {
 				matches = matches || strings.HasPrefix(message.Message, action)
 			}
 			if matches {
-				response, err := parse(roster, command.Response)
+				response, err := parse(client, roster, command.Response)
 				if err != nil {
 					log.Printf("erro ao parsear command %q: %v", command.Response, err)
 					return
 				}
-				client.Say(channel, "/color "+command.Color)
-				client.Say(channel, response)
+				if command.Color != "" {
+					client.Say(channel, "/color "+command.Color)
+				}
+				if response != "" {
+					client.Say(channel, response)
+				}
 				return
 			}
 		}
@@ -112,12 +115,17 @@ func main() {
 	}
 }
 
-func parse(roster map[string]bool, response string) (string, error) {
+func parse(client *twitch.Client, roster map[string]bool, response string) (string, error) {
 	var vars struct {
-		Roster map[string]bool
+		Roster  map[string]bool
+		Client  *twitch.Client
+	}
+	funcMap := template.FuncMap {
+		"rainbow": rainbow,
 	}
 	vars.Roster = roster
-	tmpl, err := template.New("command").Parse(response)
+	vars.Client = client
+	tmpl, err := template.New("command").Funcs(funcMap).Parse(response)
 	if err != nil {
 		return "", err
 	}
@@ -129,7 +137,7 @@ func parse(roster map[string]bool, response string) (string, error) {
 	return parsed.String(), nil
 }
 
-func rainbow(client *twitch.Client) {
+func rainbow(client *twitch.Client) string {
 	var colors = [...]string{
 		"Blue",
 		"Coral",
@@ -151,4 +159,5 @@ func rainbow(client *twitch.Client) {
 		client.Say(channel, "/color "+color)
 		client.Say(channel, "/me "+color)
 	}
+	return ""
 }

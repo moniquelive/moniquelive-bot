@@ -32,9 +32,15 @@
   },
   {
     "actions": [
-      "!roster"
+      "!roster","!count","!c"
     ],
     "color": "blue",
     "response": "/me {{ len .Roster }}"
+  },
+  {
+    "actions": [
+      "!rainbow","!r"
+    ],
+    "response": "{{ rainbow .Client }}"
   }
 ]
