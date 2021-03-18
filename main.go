@@ -21,9 +21,20 @@ const (
 	//moniqueId = "4930146"
 )
 
-type commands []struct {
+var commands []struct {
 	Actions   []string `json:"actions"`
 	Responses []string `json:"responses"`
+}
+
+func init() {
+	file, err := os.Open("commands.json")
+	if err != nil {
+		log.Fatalln("erro ao abrir commands.json:", err)
+	}
+	defer file.Close()
+	if err := json.NewDecoder(file).Decode(&commands); err != nil {
+		log.Fatalln("erro ao parsear commands.json:", err)
+	}
 }
 
 func main() {
@@ -70,22 +81,23 @@ func main() {
 		//}
 		//msg := strings.Join(users, " ")
 		//log.Println(">>>", msg)
-		commands, err := parse(roster)
-		if err != nil {
-			log.Println("erro ao parsear commands.json:", err)
-			return
-		}
 		for _, command := range commands {
 			matches := false
 			for _, action := range command.Actions {
 				matches = matches || strings.HasPrefix(message.Message, action)
 			}
-			if matches {
-				for _, response := range command.Responses {
-					client.Say(channel, response)
-				}
-				return
+			if !matches {
+				continue
 			}
+			for _, response := range command.Responses {
+				parsed, err := parseTemplate(response, roster)
+				if err != nil {
+					log.Println("erro de template:", err)
+					return
+				}
+				client.Say(channel, parsed)
+			}
+			return
 		}
 
 		// comando desconhecido...
@@ -103,36 +115,20 @@ func main() {
 	}
 }
 
-func parse(roster map[string]bool) (commands, error) {
-	//
-	// trata o .json como um arquivo texto opaco
-	//
-	jsonContents, err := os.ReadFile("commands.json")
-	if err != nil {
-		log.Fatalln("erro ao abrir commands.json:", err)
-	}
-	//
-	// executa comandos do go template...
-	//
-	tmpl, err := template.New("json").Parse(string(jsonContents))
-	if err != nil {
-		return nil, err
-	}
+func parseTemplate(str string, roster map[string]bool) (_ string, err error) {
 	var vars struct {
 		Roster map[string]bool
 	}
 	vars.Roster = roster
+
+	tmpl, err := template.New("json").Parse(str)
+	if err != nil {
+		return
+	}
 	parsed := bytes.NewBufferString("")
 	err = tmpl.Execute(parsed, vars)
 	if err != nil {
-		return nil, err
+		return
 	}
-	//
-	// ... faz o parse do json como uma struct de go (commands)
-	//
-	var c commands
-	if err := json.Unmarshal(parsed.Bytes(), &c); err != nil {
-		return nil, err
-	}
-	return c, nil
+	return parsed.String(), nil
 }
