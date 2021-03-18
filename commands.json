@@ -4,43 +4,72 @@
       "!youtube",
       "!yt"
     ],
-    "color": "yellowgreen",
-    "response": "/me playlist com os vídeos passados: https://www.youtube.com/playlist?list=PLyR9xTdgYCd9n4V5EK86aEqMd59QZeDD9"
+    "responses": [
+      "/color yellowgreen",
+      "/me playlist com os vídeos passados: https://www.youtube.com/playlist?list=PLyR9xTdgYCd9n4V5EK86aEqMd59QZeDD9"
+    ]
   },
   {
     "actions": [
       "!cybervox",
       "!vox"
     ],
-    "color": "yellowgreen",
-    "response": "/me clique neste link no seu celular para falar com o robô: https://wa.me/5521982820415?text=%23mandaaudios&lang=pt_br"
+    "responses": [
+      "/color yellowgreen",
+      "/me clique neste link no seu celular para falar com o robô: https://wa.me/5521982820415?text=%23mandaaudios&lang=pt_br"
+    ]
   },
   {
     "actions": [
       "!github",
       "!gh"
     ],
-    "color": "yellowgreen",
-    "response": "/me clique neste link para ver nossos projetinhos: https://github.com/moniquelive"
+    "responses": [
+      "/color yellowgreen",
+      "/me clique neste link para ver nossos projetinhos: https://github.com/moniquelive"
+    ]
   },
   {
     "actions": [
       "!meme"
     ],
-    "color": "yellowgreen",
-    "response": "/me clique neste link para ver nosso gerador de memes: https://meme.monique.dev"
+    "responses": [
+      "/color yellowgreen",
+      "/me clique neste link para ver nosso gerador de memes: https://meme.monique.dev"
+    ]
   },
   {
     "actions": [
-      "!roster","!count","!c"
+      "!roster",
+      "!count",
+      "!c"
     ],
-    "color": "blue",
-    "response": "/me {{ len .Roster }}"
+    "responses": [
+      "/color blue",
+      "/me {{ len .Roster }}"
+    ]
   },
   {
     "actions": [
-      "!rainbow","!r"
+      "!rainbow",
+      "!r"
     ],
-    "response": "{{ rainbow .Client }}"
+    "responses": [
+      "/color Blue",        "/me Blue",
+      "/color Coral",       "/me Coral",
+      "/color DodgerBlue",  "/me DodgerBlue",
+      "/color SpringGreen", "/me SpringGreen",
+      "/color YellowGreen", "/me YellowGreen",
+      "/color Green",       "/me Green",
+      "/color OrangeRed",   "/me OrangeRed",
+      "/color Red",         "/me Red",
+      "/color GoldenRod",   "/me GoldenRod",
+      "/color HotPink",     "/me HotPink",
+      "/color CadetBlue",   "/me CadetBlue",
+      "/color SeaGreen",    "/me SeaGreen",
+      "/color Chocolate",   "/me Chocolate",
+      "/color BlueViolet",  "/me BlueViolet",
+      "/color Firebrick",   "/me Firebrick"
+    ]
   }
 ]

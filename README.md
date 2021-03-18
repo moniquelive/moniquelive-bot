@@ -8,7 +8,6 @@
 
 # Brainstorm
 
-- [ ] hot reload config
 - [ ] comandos em _en_ e _pt-br_
 - [ ] timers (alonga, hidrata, etc.)
 
@@ -20,3 +19,4 @@
 - [x] extrair comandos para .json
 - [x] usar template para fazer comandos dinamicos
 - [x] chamar funções GO pelo template (comando !rainbow)
+- [x] "hot reload" config

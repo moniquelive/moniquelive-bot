@@ -16,27 +16,14 @@ import (
 var oauth string
 
 const (
-	channel   = "moniquelive"
-	username  = "moniquelive_bot"
-	moniqueId = "4930146"
+	channel  = "moniquelive"
+	username = "moniquelive_bot"
+	//moniqueId = "4930146"
 )
 
-var commands []struct {
-	Actions  []string `json:"actions"`
-	Color    string   `json:"color"`
-	Response string   `json:"response"`
-}
-
-func init() {
-	file, err := os.Open("commands.json")
-	if err != nil {
-		log.Fatalln("erro ao abrir commands.json:", err)
-	}
-	defer file.Close()
-
-	if err := json.NewDecoder(file).Decode(&commands); err != nil {
-		log.Fatalln("erro ao parsear commands.json:", err)
-	}
+type commands []struct {
+	Actions   []string `json:"actions"`
+	Responses []string `json:"responses"`
 }
 
 func main() {
@@ -44,7 +31,7 @@ func main() {
 	client := twitch.NewClient(username, oauth)
 
 	client.OnConnect(func() {
-		log.Println("OnConnect") // OnConnect attach callback to when a connection has been established
+		log.Println("*** OnConnect") // OnConnect attach callback to when a connection has been established
 		client.Say(channel, "/color seagreen")
 		client.Say(channel, "/me Tô na área!")
 		client.Say(channel, "/slow 1")
@@ -57,14 +44,17 @@ func main() {
 	client.OnUserNoticeMessage(func(message twitch.UserNoticeMessage) { log.Println("OnUserNoticeMessage: ", message) }) // OnUserNoticeMessage attach to new usernotice message such as sub, resub, and raids
 
 	client.OnUserJoinMessage(func(message twitch.UserJoinMessage) {
+		log.Println("*** OnUserJoinMessage >>>", message.User)
 		roster[message.User] = true
 	})
 
 	client.OnUserPartMessage(func(message twitch.UserPartMessage) {
+		log.Println("*** OnUserPartMessage <<<", message.User)
 		delete(roster, message.User)
 	})
 
 	client.OnNamesMessage(func(message twitch.NamesMessage) {
+		log.Println("*** OnNamesMessage:", len(message.Users))
 		for _, user := range message.Users {
 			roster[user] = true
 		}
@@ -80,27 +70,25 @@ func main() {
 		//}
 		//msg := strings.Join(users, " ")
 		//log.Println(">>>", msg)
+		commands, err := parse(roster)
+		if err != nil {
+			log.Println("erro ao parsear commands.json:", err)
+			return
+		}
 		for _, command := range commands {
 			matches := false
 			for _, action := range command.Actions {
 				matches = matches || strings.HasPrefix(message.Message, action)
 			}
 			if matches {
-				response, err := parse(client, roster, command.Response)
-				if err != nil {
-					log.Printf("erro ao parsear command %q: %v", command.Response, err)
-					return
-				}
-				if command.Color != "" {
-					client.Say(channel, "/color "+command.Color)
-				}
-				if response != "" {
+				for _, response := range command.Responses {
 					client.Say(channel, response)
 				}
 				return
 			}
 		}
 
+		// comando desconhecido...
 		if strings.HasPrefix(message.Message, "!") {
 			client.Say(channel, "/color firebrick")
 			client.Say(channel, "/me ⁉ do que que você está falando?!")
@@ -115,49 +103,36 @@ func main() {
 	}
 }
 
-func parse(client *twitch.Client, roster map[string]bool, response string) (string, error) {
-	var vars struct {
-		Roster  map[string]bool
-		Client  *twitch.Client
+func parse(roster map[string]bool) (commands, error) {
+	//
+	// trata o .json como um arquivo texto opaco
+	//
+	jsonContents, err := os.ReadFile("commands.json")
+	if err != nil {
+		log.Fatalln("erro ao abrir commands.json:", err)
 	}
-	funcMap := template.FuncMap {
-		"rainbow": rainbow,
+	//
+	// executa comandos do go template...
+	//
+	tmpl, err := template.New("json").Parse(string(jsonContents))
+	if err != nil {
+		return nil, err
+	}
+	var vars struct {
+		Roster map[string]bool
 	}
 	vars.Roster = roster
-	vars.Client = client
-	tmpl, err := template.New("command").Funcs(funcMap).Parse(response)
-	if err != nil {
-		return "", err
-	}
 	parsed := bytes.NewBufferString("")
 	err = tmpl.Execute(parsed, vars)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return parsed.String(), nil
-}
-
-func rainbow(client *twitch.Client) string {
-	var colors = [...]string{
-		"Blue",
-		"Coral",
-		"DodgerBlue",
-		"SpringGreen",
-		"YellowGreen",
-		"Green",
-		"OrangeRed",
-		"Red",
-		"GoldenRod",
-		"HotPink",
-		"CadetBlue",
-		"SeaGreen",
-		"Chocolate",
-		"BlueViolet",
-		"Firebrick",
+	//
+	// ... faz o parse do json como uma struct de go (commands)
+	//
+	var c commands
+	if err := json.Unmarshal(parsed.Bytes(), &c); err != nil {
+		return nil, err
 	}
-	for _, color := range colors {
-		client.Say(channel, "/color "+color)
-		client.Say(channel, "/me "+color)
-	}
-	return ""
+	return c, nil
 }
