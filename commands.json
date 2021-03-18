@@ -71,5 +71,12 @@
       "/color BlueViolet",  "/me BlueViolet",
       "/color Firebrick",   "/me Firebrick"
     ]
+  },
+  {
+    "actions": ["!linkedin"],
+    "responses": [
+      "/color yellowgreen",
+      "/me clique neste link para ver meu linkedin: https://www.linkedin.com/in/moniquelive/"
+    ]
   }
 ]

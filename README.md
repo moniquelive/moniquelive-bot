@@ -8,6 +8,8 @@
 
 # Brainstorm
 
+- [ ] bookmark !twitter, !instagram, !projeto do dia (!today)
+- [ ] comando !ban com sorteio de motivos aleatorios
 - [ ] comandos em _en_ e _pt-br_
 - [ ] timers (alonga, hidrata, etc.)
 
