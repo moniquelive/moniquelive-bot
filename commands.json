@@ -40,6 +40,15 @@
   },
   {
     "actions": [
+      "!comandos","!commands","!cmds"
+    ],
+    "responses": [
+      "/color HotPink",
+      "/me {{ .Commands }}"
+    ]
+  },
+  {
+    "actions": [
       "!roster",
       "!count",
       "!c"
@@ -73,7 +82,10 @@
     ]
   },
   {
-    "actions": ["!linkedin"],
+    "actions": [
+      "!linkedin",
+      "!l"
+    ],
     "responses": [
       "/color yellowgreen",
       "/me clique neste link para ver meu linkedin: https://www.linkedin.com/in/moniquelive/"

@@ -8,12 +8,12 @@
 
 # Brainstorm
 
-- [ ] bookmark !twitter, !instagram, !projeto do dia (!today)
 - [ ] comando !ban com sorteio de motivos aleatorios
-- [ ] comandos em _en_ e _pt-br_
+- [ ] bookmark !twitter, !instagram, !projeto do dia (!today)
 - [ ] timers (alonga, hidrata, etc.)
 
 # DONE
+- [x] comandos em _en_ e _pt-br_
 - [x] /slow 1
 - [x] /uniquechat
 - [x] /me bot responses
@@ -22,3 +22,4 @@
 - [x] usar template para fazer comandos dinamicos
 - [x] chamar funções GO pelo template (comando !rainbow)
 - [x] "hot reload" config
+- [x] hot reload for reals (real real)

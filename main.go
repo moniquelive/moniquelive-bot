@@ -8,7 +8,9 @@ import (
 	"os"
 	"strings"
 	"text/template"
+	"time"
 
+	"github.com/fsnotify/fsnotify"
 	"github.com/gempir/go-twitch-irc/v2"
 )
 
@@ -27,14 +29,7 @@ var commands []struct {
 }
 
 func init() {
-	file, err := os.Open("commands.json")
-	if err != nil {
-		log.Fatalln("erro ao abrir commands.json:", err)
-	}
-	defer file.Close()
-	if err := json.NewDecoder(file).Decode(&commands); err != nil {
-		log.Fatalln("erro ao parsear commands.json:", err)
-	}
+	reloadCommands()
 }
 
 func main() {
@@ -109,17 +104,71 @@ func main() {
 
 	client.Join(channel)
 
-	err := client.Connect()
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer watcher.Close()
+
+	watchCommandsFSChange(watcher)
+
+	err = client.Connect()
 	if err != nil {
 		panic(err)
 	}
 }
 
+func watchCommandsFSChange(watcher *fsnotify.Watcher) {
+	go func() {
+		for {
+			select {
+			case event, ok := <-watcher.Events:
+				if !ok {
+					log.Println("watchCommandsFSChange > events quit")
+					return
+				}
+				//log.Println("watchCommandsFSChange > event:", event)
+				if event.Op&fsnotify.Write == fsnotify.Write {
+					log.Println("watchCommandsFSChange > modified file:", event.Name)
+					time.Sleep(1 * time.Second)
+					reloadCommands()
+				}
+				if event.Op&fsnotify.Create == fsnotify.Create && strings.HasSuffix(event.Name, "commands.json") {
+					log.Println("watchCommandsFSChange > re-watching:", event.Name)
+					if err := watcher.Add("./commands.json"); err != nil {
+						log.Println("watchCommandsFSChange > watcher.Add:", err)
+					}
+				}
+			case err, ok := <-watcher.Errors:
+				if !ok {
+					log.Println("watchCommandsFSChange > errors quit")
+					return
+				}
+				log.Println("watchCommandsFSChange > error:", err)
+			}
+		}
+	}()
+
+	if err := watcher.Add("./"); err != nil {
+		log.Fatalln(err)
+	}
+
+	if err := watcher.Add("./commands.json"); err != nil {
+		log.Fatalln(err)
+	}
+}
+
 func parseTemplate(str string, roster map[string]bool) (_ string, err error) {
+	var actions []string
+	for _, command := range commands {
+		actions = append(actions, command.Actions[0])
+	}
 	var vars struct {
-		Roster map[string]bool
+		Roster   map[string]bool
+		Commands string
 	}
 	vars.Roster = roster
+	vars.Commands = strings.Join(actions, " ")
 
 	tmpl, err := template.New("json").Parse(str)
 	if err != nil {
@@ -131,4 +180,15 @@ func parseTemplate(str string, roster map[string]bool) (_ string, err error) {
 		return
 	}
 	return parsed.String(), nil
+}
+
+func reloadCommands() {
+	file, err := os.Open("commands.json")
+	if err != nil {
+		log.Fatalln("erro ao abrir commands.json:", err)
+	}
+	defer file.Close()
+	if err := json.NewDecoder(file).Decode(&commands); err != nil {
+		log.Fatalln("erro ao parsear commands.json:", err)
+	}
 }
