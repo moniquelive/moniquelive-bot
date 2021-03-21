@@ -90,5 +90,21 @@
       "/color yellowgreen",
       "/me clique neste link para ver meu linkedin: https://www.linkedin.com/in/moniquelive/"
     ]
+  },
+  {
+    "actions": [
+      "!social",
+      "!s"
+    ],
+    "responses": [
+      "/color yellowgreen",
+      "/me github: https://github.com/moniquelive",
+      "/me linkedin: https://linkedin.com/in/moniquelive",
+      "/me twitter: https://twitter.com/moniquelive",
+      "/me instagram: https://www.instagram.com/moniquelive.dev",
+      "/me youtube: https://www.youtube.com/channel/UCML4uqYh36vkI0UTTGBxByg",
+      "/me stackoverflow: https://stackoverflow.com/users/9793/cyber-oliveira",
+      "/me dev.to: https://dev.to/moniquelive"
+    ]
   }
 ]
