@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+	"sort"
 	"strings"
 	"text/template"
 	"time"
@@ -23,10 +24,14 @@ const (
 	//moniqueId = "4930146"
 )
 
-var commands []struct {
-	Actions   []string `json:"actions"`
-	Responses []string `json:"responses"`
-}
+var (
+	commands []struct {
+		Actions   []string `json:"actions"`
+		Responses []string `json:"responses"`
+	}
+	actionResponses map[string][]string
+	sortedActions []string
+)
 
 func init() {
 	reloadCommands()
@@ -76,15 +81,9 @@ func main() {
 		//}
 		//msg := strings.Join(users, " ")
 		//log.Println(">>>", msg)
-		for _, command := range commands {
-			matches := false
-			for _, action := range command.Actions {
-				matches = matches || strings.HasPrefix(message.Message, action)
-			}
-			if !matches {
-				continue
-			}
-			for _, response := range command.Responses {
+		responses, ok := actionResponses[message.Message]
+		if ok {
+			for _, response := range responses {
 				parsed, err := parseTemplate(response, roster)
 				if err != nil {
 					log.Println("erro de template:", err)
@@ -98,7 +97,7 @@ func main() {
 		// comando desconhecido...
 		if strings.HasPrefix(message.Message, "!") {
 			client.Say(channel, "/color firebrick")
-			client.Say(channel, "/me ⁉ do que que você está falando?!")
+			client.Say(channel, "/me não conheço esse: "+message.Message)
 		}
 	})
 
@@ -159,16 +158,12 @@ func watchCommandsFSChange(watcher *fsnotify.Watcher) {
 }
 
 func parseTemplate(str string, roster map[string]bool) (_ string, err error) {
-	var actions []string
-	for _, command := range commands {
-		actions = append(actions, command.Actions[0])
-	}
 	var vars struct {
 		Roster   map[string]bool
 		Commands string
 	}
 	vars.Roster = roster
-	vars.Commands = strings.Join(actions, " ")
+	vars.Commands = strings.Join(sortedActions, " ")
 
 	tmpl, err := template.New("json").Parse(str)
 	if err != nil {
@@ -191,4 +186,21 @@ func reloadCommands() {
 	if err := json.NewDecoder(file).Decode(&commands); err != nil {
 		log.Fatalln("erro ao parsear commands.json:", err)
 	}
+	// refresh action x responses map
+	actionResponses = make(map[string][]string)
+	for _, command := range commands {
+		responses := command.Responses
+		for _, action := range command.Actions {
+			actionResponses[action] = responses
+		}
+	}
+	// refresh sorted actions (for !commands)
+	sortedActions = nil
+	for _, command := range commands {
+		if len(command.Actions) < 1 {
+			continue
+		}
+		sortedActions = append(sortedActions, command.Actions[0])
+	}
+	sort.Strings(sortedActions)
 }
