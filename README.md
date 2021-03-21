@@ -8,8 +8,10 @@
 
 # Brainstorm
 
+- [ ] adicionar comando !help / !ajuda
+- [ ] fator de correção no !roster (-3)
 - [ ] comando !ban com sorteio de motivos aleatorios
-- [ ] bookmark !twitter, !instagram, !projeto do dia (!today)
+- [ ] bookmark !blog, !twitter, !instagram, !projeto do dia (!today)
 - [ ] timers (alonga, hidrata, etc.)
 
 # DONE
