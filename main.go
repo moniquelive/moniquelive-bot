@@ -66,12 +66,6 @@ func main() {
 		log.Printf("%s (%v): %s\n", message.User.DisplayName, message.User.ID, message.Message)
 		//if message.User.ID == moniqueId {
 		//}
-		//var users []string
-		//for user := range roster {
-		//	users = append(users, user)
-		//}
-		//msg := strings.Join(users, " ")
-		//log.Println(">>>", msg)
 		// cai fora rápido se não for comando que começa com '!'
 		if message.Message == "!" || message.Message[0] != '!' {
 			return
