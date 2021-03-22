@@ -95,7 +95,7 @@ func main() {
 
 		// pula comandos marcados para ignorar
 		for _, ignoredCommand := range config.IgnoredCommands {
-			if message.Message == ignoredCommand {
+			if strings.HasPrefix(message.Message, ignoredCommand) {
 				return
 			}
 		}

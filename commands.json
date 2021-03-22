@@ -3,7 +3,8 @@
     "!sh",
     "!sh-so",
     "!sh-mso",
-    "!sh-raid"
+    "!sh-raid",
+    "!permit"
   ],
   "commands": [
     {
