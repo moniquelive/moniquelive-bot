@@ -3,10 +3,8 @@ package main
 import (
 	"bytes"
 	_ "embed"
-	"encoding/json"
+	"fmt"
 	"log"
-	"os"
-	"sort"
 	"strings"
 	"text/template"
 	"time"
@@ -18,23 +16,16 @@ import (
 //go:embed .oauth
 var oauth string
 
+var config configType
+
 const (
 	channel  = "moniquelive"
 	username = "moniquelive_bot"
 	//moniqueId = "4930146"
 )
 
-var (
-	commands []struct {
-		Actions   []string `json:"actions"`
-		Responses []string `json:"responses"`
-	}
-	actionResponses map[string][]string
-	sortedActions []string
-)
-
 func init() {
-	reloadCommands()
+	config.reload()
 }
 
 func main() {
@@ -45,7 +36,7 @@ func main() {
 		log.Println("*** OnConnect") // OnConnect attach callback to when a connection has been established
 		client.Say(channel, "/color seagreen")
 		client.Say(channel, "/me Tô na área!")
-		client.Say(channel, "/slow 1")
+		// client.Say(channel, "/slow 1")
 		client.Say(channel, "/uniquechat")
 	})
 
@@ -81,7 +72,11 @@ func main() {
 		//}
 		//msg := strings.Join(users, " ")
 		//log.Println(">>>", msg)
-		responses, ok := actionResponses[message.Message]
+		// cai fora rápido se não for comando que começa com '!'
+		if message.Message == "!" || message.Message[0] != '!' {
+			return
+		}
+		responses, ok := config.actionResponses[message.Message]
 		if ok {
 			for _, response := range responses {
 				parsed, err := parseTemplate(response, roster)
@@ -91,7 +86,24 @@ func main() {
 				}
 				client.Say(channel, parsed)
 			}
+			if logs := config.actionLogs[message.Message]; len(logs) > 0 {
+				for _, l := range logs {
+					parsed, err := parseTemplate(l, roster)
+					if err != nil {
+						log.Println("erro de template:", err)
+						return
+					}
+					fmt.Println(parsed)
+				}
+			}
 			return
+		}
+
+		// pula comandos marcados para ignorar
+		for _, ignoredCommand := range config.IgnoredCommands {
+			if message.Message == ignoredCommand {
+				return
+			}
 		}
 
 		// comando desconhecido...
@@ -130,7 +142,7 @@ func watchCommandsFSChange(watcher *fsnotify.Watcher) {
 				if event.Op&fsnotify.Write == fsnotify.Write {
 					log.Println("watchCommandsFSChange > modified file:", event.Name)
 					time.Sleep(1 * time.Second)
-					reloadCommands()
+					config.reload()
 				}
 				if event.Op&fsnotify.Create == fsnotify.Create && strings.HasSuffix(event.Name, "commands.json") {
 					log.Println("watchCommandsFSChange > re-watching:", event.Name)
@@ -158,14 +170,17 @@ func watchCommandsFSChange(watcher *fsnotify.Watcher) {
 }
 
 func parseTemplate(str string, roster map[string]bool) (_ string, err error) {
+	fm := template.FuncMap{
+		"keys": keys,
+	}
 	var vars struct {
 		Roster   map[string]bool
 		Commands string
 	}
 	vars.Roster = roster
-	vars.Commands = strings.Join(sortedActions, " ")
+	vars.Commands = strings.Join(config.sortedActions, " ")
 
-	tmpl, err := template.New("json").Parse(str)
+	tmpl, err := template.New("json").Funcs(fm).Parse(str)
 	if err != nil {
 		return
 	}
@@ -175,32 +190,4 @@ func parseTemplate(str string, roster map[string]bool) (_ string, err error) {
 		return
 	}
 	return parsed.String(), nil
-}
-
-func reloadCommands() {
-	file, err := os.Open("commands.json")
-	if err != nil {
-		log.Fatalln("erro ao abrir commands.json:", err)
-	}
-	defer file.Close()
-	if err := json.NewDecoder(file).Decode(&commands); err != nil {
-		log.Fatalln("erro ao parsear commands.json:", err)
-	}
-	// refresh action x responses map
-	actionResponses = make(map[string][]string)
-	for _, command := range commands {
-		responses := command.Responses
-		for _, action := range command.Actions {
-			actionResponses[action] = responses
-		}
-	}
-	// refresh sorted actions (for !commands)
-	sortedActions = nil
-	for _, command := range commands {
-		if len(command.Actions) < 1 {
-			continue
-		}
-		sortedActions = append(sortedActions, command.Actions[0])
-	}
-	sort.Strings(sortedActions)
 }

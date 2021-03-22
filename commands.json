@@ -1,110 +1,132 @@
-[
-  {
-    "actions": [
-      "!youtube",
-      "!yt"
-    ],
-    "responses": [
-      "/color yellowgreen",
-      "/me playlist com os vídeos passados: https://www.youtube.com/playlist?list=PLyR9xTdgYCd9n4V5EK86aEqMd59QZeDD9"
-    ]
-  },
-  {
-    "actions": [
-      "!cybervox",
-      "!vox"
-    ],
-    "responses": [
-      "/color yellowgreen",
-      "/me clique neste link no seu celular para falar com o robô: https://wa.me/5521982820415?text=%23mandaaudios&lang=pt_br"
-    ]
-  },
-  {
-    "actions": [
-      "!github",
-      "!gh"
-    ],
-    "responses": [
-      "/color yellowgreen",
-      "/me clique neste link para ver nossos projetinhos: https://github.com/moniquelive"
-    ]
-  },
-  {
-    "actions": [
-      "!meme"
-    ],
-    "responses": [
-      "/color yellowgreen",
-      "/me clique neste link para ver nosso gerador de memes: https://meme.monique.dev"
-    ]
-  },
-  {
-    "actions": [
-      "!comandos","!commands","!cmds"
-    ],
-    "responses": [
-      "/color HotPink",
-      "/me {{ .Commands }}"
-    ]
-  },
-  {
-    "actions": [
-      "!roster",
-      "!count",
-      "!c"
-    ],
-    "responses": [
-      "/color blue",
-      "/me {{ len .Roster }}"
-    ]
-  },
-  {
-    "actions": [
-      "!rainbow",
-      "!r"
-    ],
-    "responses": [
-      "/color Blue",        "/me Blue",
-      "/color Coral",       "/me Coral",
-      "/color DodgerBlue",  "/me DodgerBlue",
-      "/color SpringGreen", "/me SpringGreen",
-      "/color YellowGreen", "/me YellowGreen",
-      "/color Green",       "/me Green",
-      "/color OrangeRed",   "/me OrangeRed",
-      "/color Red",         "/me Red",
-      "/color GoldenRod",   "/me GoldenRod",
-      "/color HotPink",     "/me HotPink",
-      "/color CadetBlue",   "/me CadetBlue",
-      "/color SeaGreen",    "/me SeaGreen",
-      "/color Chocolate",   "/me Chocolate",
-      "/color BlueViolet",  "/me BlueViolet",
-      "/color Firebrick",   "/me Firebrick"
-    ]
-  },
-  {
-    "actions": [
-      "!linkedin",
-      "!l"
-    ],
-    "responses": [
-      "/color yellowgreen",
-      "/me clique neste link para ver meu linkedin: https://www.linkedin.com/in/moniquelive/"
-    ]
-  },
-  {
-    "actions": [
-      "!social",
-      "!s"
-    ],
-    "responses": [
-      "/color yellowgreen",
-      "/me github: https://github.com/moniquelive",
-      "/me linkedin: https://linkedin.com/in/moniquelive",
-      "/me twitter: https://twitter.com/moniquelive",
-      "/me instagram: https://www.instagram.com/moniquelive.dev",
-      "/me youtube: https://www.youtube.com/channel/UCML4uqYh36vkI0UTTGBxByg",
-      "/me stackoverflow: https://stackoverflow.com/users/9793/cyber-oliveira",
-      "/me dev.to: https://dev.to/moniquelive"
-    ]
-  }
-]
+{
+  "ignored-commands": [
+    "!sh",
+    "!sh-so",
+    "!sh-mso",
+    "!sh-raid"
+  ],
+  "commands": [
+    {
+      "actions": [
+        "!youtube",
+        "!yt"
+      ],
+      "responses": [
+        "/color yellowgreen",
+        "/me playlist com os vídeos passados: https://www.youtube.com/playlist?list=PLyR9xTdgYCd9n4V5EK86aEqMd59QZeDD9"
+      ]
+    },
+    {
+      "actions": [
+        "!cybervox",
+        "!vox"
+      ],
+      "responses": [
+        "/color yellowgreen",
+        "/me clique neste link no seu celular para falar com o robô: https://wa.me/5521982820415?text=%23mandaaudios&lang=pt_br"
+      ]
+    },
+    {
+      "actions": [
+        "!github",
+        "!gh"
+      ],
+      "responses": [
+        "/color yellowgreen",
+        "/me clique neste link para ver nossos projetinhos: https://github.com/moniquelive"
+      ]
+    },
+    {
+      "actions": [
+        "!meme"
+      ],
+      "responses": [
+        "/color yellowgreen",
+        "/me clique neste link para ver nosso gerador de memes: https://meme.monique.dev"
+      ]
+    },
+    {
+      "actions": [
+        "!comandos",
+        "!commands",
+        "!cmds"
+      ],
+      "responses": [
+        "/color HotPink",
+        "/me {{ .Commands }}"
+      ]
+    },
+    {
+      "actions": [
+        "!count",
+        "!c"
+      ],
+      "responses": [
+        "/color blue",
+        "/me {{ len .Roster }}"
+      ],
+      "logs": [
+        "{{ keys .Roster }}"
+      ]
+    },
+    {
+      "actions": [
+        "!rainbow",
+        "!r"
+      ],
+      "responses": [
+        "/color Blue",        "/me Blue",
+        "/color Coral",       "/me Coral",
+        "/color DodgerBlue",  "/me DodgerBlue",
+        "/color SpringGreen", "/me SpringGreen",
+        "/color YellowGreen", "/me YellowGreen",
+        "/color Green",       "/me Green",
+        "/color OrangeRed",   "/me OrangeRed",
+        "/color Red",         "/me Red",
+        "/color GoldenRod",   "/me GoldenRod",
+        "/color HotPink",     "/me HotPink",
+        "/color CadetBlue",   "/me CadetBlue",
+        "/color SeaGreen",    "/me SeaGreen",
+        "/color Chocolate",   "/me Chocolate",
+        "/color BlueViolet",  "/me BlueViolet",
+        "/color Firebrick",   "/me Firebrick"
+      ]
+    },
+    {
+      "actions": [
+        "!linkedin",
+        "!l"
+      ],
+      "responses": [
+        "/color yellowgreen",
+        "/me clique neste link para ver meu linkedin: https://www.linkedin.com/in/moniquelive/"
+      ]
+    },
+    {
+      "actions": [
+        "!social",
+        "!s"
+      ],
+      "responses": [
+        "/color yellowgreen",
+        "/me github: https://github.com/moniquelive",
+        "/me linkedin: https://linkedin.com/in/moniquelive",
+        "/me twitter: https://twitter.com/moniquelive",
+        "/me instagram: https://www.instagram.com/moniquelive.dev",
+        "/me youtube: https://www.youtube.com/channel/UCML4uqYh36vkI0UTTGBxByg",
+        "/me stackoverflow: https://stackoverflow.com/users/9793/cyber-oliveira",
+        "/me dev.to: https://dev.to/moniquelive"
+      ]
+    },
+    {
+      "actions": [
+        "!wiki",
+        "!w"
+      ],
+      "responses": [
+        "/color yellowgreen",
+        "/me https://github.com/moniquelive/moniquelive/wiki"
+      ]
+    }
+  ]
+}

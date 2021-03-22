@@ -8,6 +8,8 @@
 
 # Brainstorm
 
+- [ ] webserver com api / layer de roster ou chamar obs websocket
+- [ ] timeout (throttle) para comandos
 - [ ] adicionar comando !help / !ajuda
 - [ ] fator de correção no !roster (-3)
 - [ ] comando !ban com sorteio de motivos aleatorios
@@ -25,3 +27,7 @@
 - [x] chamar funções GO pelo template (comando !rainbow)
 - [x] "hot reload" config
 - [x] hot reload for reals (real real)
+- [x] refactoring: extract config.go
+- [x] comando: !wiki
+- [x] rectoring: formato do json, com ignored-commands e "logs" opcional por comando
+
