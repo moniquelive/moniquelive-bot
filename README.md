@@ -10,7 +10,6 @@
 
 - [ ] webserver com api / layer de roster ou chamar obs websocket
 - [ ] timeout (throttle) para comandos
-- [ ] adicionar comando !help / !ajuda
 - [ ] fator de correção no !roster (-3)
 - [ ] comando !ban com sorteio de motivos aleatorios
 - [ ] bookmark !blog, !twitter, !instagram, !projeto do dia (!today)
@@ -30,4 +29,4 @@
 - [x] refactoring: extract config.go
 - [x] comando: !wiki
 - [x] rectoring: formato do json, com ignored-commands e "logs" opcional por comando
-
+- [x] adicionar comando !help / !ajuda

@@ -70,19 +70,25 @@ func main() {
 		if message.Message == "!" || message.Message[0] != '!' {
 			return
 		}
-		responses, ok := config.actionResponses[message.Message]
+		split := strings.Split(message.Message, " ")
+		action := split[0]
+		cmdLine := ""
+		if len(split) > 1 {
+			cmdLine = strings.Join(split[1:], " ")
+		}
+		responses, ok := config.actionResponses[action]
 		if ok {
 			for _, response := range responses {
-				parsed, err := parseTemplate(response, roster)
+				parsed, err := parseTemplate(response, roster, cmdLine)
 				if err != nil {
 					log.Println("erro de template:", err)
 					return
 				}
 				client.Say(channel, parsed)
 			}
-			if logs := config.actionLogs[message.Message]; len(logs) > 0 {
+			if logs := config.actionLogs[action]; len(logs) > 0 {
 				for _, l := range logs {
-					parsed, err := parseTemplate(l, roster)
+					parsed, err := parseTemplate(l, roster, cmdLine)
 					if err != nil {
 						log.Println("erro de template:", err)
 						return
@@ -163,16 +169,20 @@ func watchCommandsFSChange(watcher *fsnotify.Watcher) {
 	}
 }
 
-func parseTemplate(str string, roster map[string]bool) (_ string, err error) {
+func parseTemplate(str string, roster map[string]bool, cmdLine string) (_ string, err error) {
 	fm := template.FuncMap{
 		"keys": keys,
 	}
 	var vars struct {
 		Roster   map[string]bool
 		Commands string
+		CmdLine string
+		Config configType
 	}
 	vars.Roster = roster
 	vars.Commands = strings.Join(config.sortedActions, " ")
+	vars.CmdLine = cmdLine
+	vars.Config = config
 
 	tmpl, err := template.New("json").Funcs(fm).Parse(str)
 	if err != nil {

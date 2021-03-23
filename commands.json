@@ -8,6 +8,8 @@
   ],
   "commands": [
     {
+      "help": "Youtube Playlist with past videos",
+      "ajuda": "Playlist do Youtube com os vídeos passados",
       "actions": [
         "!youtube",
         "!yt"
@@ -18,6 +20,8 @@
       ]
     },
     {
+      "help": "Talk to CyberVox bot",
+      "ajuda": "Falar com o robô CyberVox",
       "actions": [
         "!cybervox",
         "!vox"
@@ -28,6 +32,8 @@
       ]
     },
     {
+      "help": "Our projects",
+      "ajuda": "Nossos projetos",
       "actions": [
         "!github",
         "!gh"
@@ -38,6 +44,8 @@
       ]
     },
     {
+      "help": "Meme generator",
+      "ajuda": "Gerador de memes",
       "actions": [
         "!meme"
       ],
@@ -47,6 +55,8 @@
       ]
     },
     {
+      "help": "Lists available commands",
+      "ajuda": "Lista comandos disponíveis",
       "actions": [
         "!comandos",
         "!commands",
@@ -58,6 +68,8 @@
       ]
     },
     {
+      "help": "How many people are in our chat room",
+      "ajuda": "Quantas pessoas estão online",
       "actions": [
         "!count",
         "!c"
@@ -71,6 +83,8 @@
       ]
     },
     {
+      "help": "\uD83C\uDF08",
+      "ajuda": "\uD83C\uDF08",
       "actions": [
         "!rainbow",
         "!r"
@@ -94,6 +108,8 @@
       ]
     },
     {
+      "help": "Moniquelive's Linkedin profile",
+      "ajuda": "Linkedin da Moniquelive",
       "actions": [
         "!linkedin",
         "!l"
@@ -104,12 +120,15 @@
       ]
     },
     {
+      "help": "Moniquelive's social networks",
+      "ajuda": "Redes sociais da Moniquelive",
       "actions": [
         "!social",
         "!s"
       ],
       "responses": [
         "/color yellowgreen",
+        "/me blog: https://monique.dev",
         "/me github: https://github.com/moniquelive",
         "/me linkedin: https://linkedin.com/in/moniquelive",
         "/me twitter: https://twitter.com/moniquelive",
@@ -120,6 +139,8 @@
       ]
     },
     {
+      "help": "Our wiki",
+      "ajuda": "Nosso wiki",
       "actions": [
         "!wiki",
         "!w"
@@ -127,6 +148,31 @@
       "responses": [
         "/color yellowgreen",
         "/me https://github.com/moniquelive/moniquelive/wiki"
+      ]
+    },
+    {
+      "help": "Type '!help <cmd>' for <cmd>'s description",
+      "ajuda": "Digite '!ajuda <cmd>' para ver a descrição de <cmd>",
+      "actions": [
+        "!help",
+        "!h"
+      ],
+      "responses": [
+        "/color goldenrod",
+        "/me {{ .Config.Help .CmdLine }}"
+      ]
+    },
+    {
+      "help": "Type '!help <cmd>' for <cmd>'s description",
+      "ajuda": "Digite '!ajuda <cmd>' para ver a descrição de <cmd>",
+      "actions": [
+        "!ajuda",
+        "!a",
+        "!?"
+      ],
+      "responses": [
+        "/color goldenrod",
+        "/me {{ .Config.Ajuda .CmdLine }}"
       ]
     }
   ]
