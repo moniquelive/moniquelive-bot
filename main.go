@@ -24,6 +24,17 @@ const (
 	//moniqueId = "4930146"
 )
 
+const (
+	colorGreen   = "\033[32m"
+	colorWhite   = "\033[30;47m"
+	colorYellow  = "\033[30;43m"
+	colorRed     = "\033[31m"
+	colorBlue    = "\033[34m"
+	colorMagenta = "\033[35m"
+	colorCyan    = "\033[36m"
+	colorReset   = "\033[0m"
+)
+
 func init() {
 	config.reload()
 }
@@ -46,24 +57,25 @@ func main() {
 	client.OnUserNoticeMessage(func(message twitch.UserNoticeMessage) { log.Println("OnUserNoticeMessage: ", message) }) // OnUserNoticeMessage attach to new usernotice message such as sub, resub, and raids
 
 	client.OnUserJoinMessage(func(message twitch.UserJoinMessage) {
-		log.Println("*** OnUserJoinMessage >>>", message.User)
+		log.Println(colorGreen, "*** OnUserJoinMessage >>>", message.User, colorReset)
 		roster[message.User] = true
 	})
 
 	client.OnUserPartMessage(func(message twitch.UserPartMessage) {
-		log.Println("*** OnUserPartMessage <<<", message.User)
+		log.Println(colorRed, "*** OnUserPartMessage <<<", message.User, colorReset)
 		delete(roster, message.User)
 	})
 
 	client.OnNamesMessage(func(message twitch.NamesMessage) {
-		log.Println("*** OnNamesMessage:", len(message.Users))
+		log.Println(colorWhite, "*** OnNamesMessage:", len(message.Users), colorReset)
 		for _, user := range message.Users {
 			roster[user] = true
 		}
 	})
 
 	client.OnPrivateMessage(func(message twitch.PrivateMessage) {
-		log.Printf("%s (%v): %s\n", message.User.DisplayName, message.User.ID, message.Message)
+		setColorForUser(message.User.Name, message.Message)
+		log.Printf("%s (%v): %s%s\n", message.User.DisplayName, message.User.ID, message.Message, colorReset)
 		//if message.User.ID == moniqueId {
 		//}
 		// cai fora rápido se não for comando que começa com '!'
@@ -129,6 +141,13 @@ func main() {
 	}
 }
 
+func setColorForUser(userName string, message string) {
+	switch userName {
+	case "acaverna", "streamlabs", "streamholics", "moniquelive_bot":
+		log.Println(colorCyan)
+	}
+}
+
 func watchCommandsFSChange(watcher *fsnotify.Watcher) {
 	go func() {
 		for {
@@ -176,8 +195,8 @@ func parseTemplate(str string, roster map[string]bool, cmdLine string) (_ string
 	var vars struct {
 		Roster   map[string]bool
 		Commands string
-		CmdLine string
-		Config configType
+		CmdLine  string
+		Config   configType
 	}
 	vars.Roster = roster
 	vars.Commands = strings.Join(config.sortedActions, " ")

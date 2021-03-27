@@ -8,7 +8,6 @@
 
 # Brainstorm
 
-- [ ] log colorido
 - [ ] comando !ban com sorteio de motivos aleatorios
 - [ ] fator de correção no !roster (-3)
 - [ ] !projeto do dia (!today)
@@ -32,3 +31,4 @@
 - [x] rectoring: formato do json, com ignored-commands e "logs" opcional por comando
 - [x] adicionar comando !help / !ajuda
 - [x] bookmark !blog, !twitter, !instagram
+- [x] log colorido
