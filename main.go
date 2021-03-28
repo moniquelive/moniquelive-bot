@@ -40,7 +40,7 @@ func init() {
 }
 
 func main() {
-	roster := map[string]bool{}
+	roster := NewRoster()
 	client := twitch.NewClient(username, oauth)
 
 	client.OnConnect(func() {
@@ -58,18 +58,18 @@ func main() {
 
 	client.OnUserJoinMessage(func(message twitch.UserJoinMessage) {
 		log.Println(colorGreen, "*** OnUserJoinMessage >>>", message.User, colorReset)
-		roster[message.User] = true
+		roster.AddUser(message.User)
 	})
 
 	client.OnUserPartMessage(func(message twitch.UserPartMessage) {
 		log.Println(colorRed, "*** OnUserPartMessage <<<", message.User, colorReset)
-		delete(roster, message.User)
+		roster.RemoveUser(message.User)
 	})
 
 	client.OnNamesMessage(func(message twitch.NamesMessage) {
 		log.Println(colorWhite, "*** OnNamesMessage:", len(message.Users), colorReset)
 		for _, user := range message.Users {
-			roster[user] = true
+			roster.AddUser(user)
 		}
 	})
 
@@ -188,17 +188,17 @@ func watchCommandsFSChange(watcher *fsnotify.Watcher) {
 	}
 }
 
-func parseTemplate(str string, roster map[string]bool, cmdLine string) (_ string, err error) {
+func parseTemplate(str string, r *roster, cmdLine string) (_ string, err error) {
 	fm := template.FuncMap{
 		"keys": keys,
 	}
 	var vars struct {
-		Roster   map[string]bool
+		Roster   roster
 		Commands string
 		CmdLine  string
 		Config   configType
 	}
-	vars.Roster = roster
+	vars.Roster = *r
 	vars.Commands = strings.Join(config.sortedActions, " ")
 	vars.CmdLine = cmdLine
 	vars.Config = config
