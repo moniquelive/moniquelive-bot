@@ -1,4 +1,4 @@
-package main
+package commands
 
 import (
 	"encoding/json"
@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-type configType struct {
+type Commands struct {
 	IgnoredCommands []string `json:"ignored-commands"`
 	Commands        []struct {
 		Actions   []string `json:"actions"`
@@ -18,14 +18,14 @@ type configType struct {
 		Ajuda     string   `json:"ajuda"`
 		Help      string   `json:"help"`
 	} `json:"commands"`
-	actionResponses map[string][]string
-	actionLogs      map[string][]string
+	ActionResponses map[string][]string
+	ActionLogs      map[string][]string
+	SortedActions   []string
 	actionAjuda     map[string]string
 	actionHelp      map[string]string
-	sortedActions   []string
 }
 
-func (c configType) Ajuda(cmdLine string) string {
+func (c Commands) Ajuda(cmdLine string) string {
 	if cmdLine[0] != '!' {
 		cmdLine = "!" + cmdLine
 	}
@@ -36,7 +36,7 @@ func (c configType) Ajuda(cmdLine string) string {
 	return fmt.Sprintf("Comando %q não encontrado...", action)
 }
 
-func (c configType) Help(cmdLine string) string {
+func (c Commands) Help(cmdLine string) string {
 	if cmdLine[0] != '!' {
 		cmdLine = "!" + cmdLine
 	}
@@ -47,7 +47,7 @@ func (c configType) Help(cmdLine string) string {
 	return fmt.Sprintf("Help not found for %q...", action)
 }
 
-func (c *configType) reload() {
+func (c *Commands) Reload() {
 	file, err := os.Open("commands.json")
 	if err != nil {
 		log.Fatalln("erro ao abrir commands.json:", err)
@@ -59,10 +59,10 @@ func (c *configType) reload() {
 	c.refreshCache()
 }
 
-func (c *configType) refreshCache() {
-	c.actionLogs = make(map[string][]string)      // refresh action x logs map
-	c.actionResponses = make(map[string][]string) // refresh action x responses map
-	c.sortedActions = nil                         // refresh sorted actions (for !commands)
+func (c *Commands) refreshCache() {
+	c.ActionLogs = make(map[string][]string)      // refresh action x logs map
+	c.ActionResponses = make(map[string][]string) // refresh action x responses map
+	c.SortedActions = nil                         // refresh sorted actions (for !commands)
 	c.actionAjuda = make(map[string]string)       // refresh action x Ajuda texts
 	c.actionHelp = make(map[string]string)        // refresh action x Help texts
 	for _, command := range c.Commands {
@@ -71,15 +71,15 @@ func (c *configType) refreshCache() {
 		ajuda := command.Ajuda
 		help := command.Help
 		for _, action := range command.Actions {
-			c.actionResponses[action] = responses
-			c.actionLogs[action] = logs
+			c.ActionResponses[action] = responses
+			c.ActionLogs[action] = logs
 			c.actionAjuda[action] = ajuda
 			c.actionHelp[action] = help
 		}
 		if len(command.Actions) < 1 {
 			continue
 		}
-		c.sortedActions = append(c.sortedActions, command.Actions[0])
+		c.SortedActions = append(c.SortedActions, command.Actions[0])
 	}
-	sort.Strings(c.sortedActions)
+	sort.Strings(c.SortedActions)
 }

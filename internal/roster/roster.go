@@ -1,12 +1,13 @@
-package main
+package roster
 
 import (
 	"log"
+	"sort"
 
 	"github.com/go-redis/redis"
 )
 
-type roster map[string]bool
+type Roster map[string]bool
 
 const redisSetKey = "moniquelive_bot:roster"
 const redisChannel = "moniquelive_bot:notifications"
@@ -20,20 +21,20 @@ func notify() {
 func init() {
 	red = redis.NewClient(&redis.Options{Addr: "127.0.0.1:6379"})
 	if _, err := red.Ping().Result(); err != nil {
-		log.Println("roster.init > Sem redis...")
+		log.Println("RosterType.init > Sem redis...")
 		red = nil
 	}
 }
 
-func NewRoster() *roster {
+func New() *Roster {
 	if red != nil {
 		red.Del(redisSetKey)
 		notify()
 	}
-	return &roster{}
+	return &Roster{}
 }
 
-func (r *roster) AddUser(userName string) {
+func (r *Roster) AddUser(userName string) {
 	if red != nil {
 		red.SAdd(redisSetKey, userName)
 		notify()
@@ -41,10 +42,19 @@ func (r *roster) AddUser(userName string) {
 	(*r)[userName] = true
 }
 
-func (r *roster) RemoveUser(userName string) {
+func (r *Roster) RemoveUser(userName string) {
 	if red != nil {
 		red.SRem(redisSetKey, userName)
 		notify()
 	}
 	delete(*r, userName)
+}
+
+func (r Roster) Keys() []string {
+	var result []string
+	for k := range r {
+		result = append(result, k)
+	}
+	sort.Strings(result)
+	return result
 }

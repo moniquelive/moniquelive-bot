@@ -79,7 +79,7 @@
         "/me {{ len .Roster }}"
       ],
       "logs": [
-        "{{ keys .Roster }}"
+        "{{ .Roster.Keys }}"
       ]
     },
     {

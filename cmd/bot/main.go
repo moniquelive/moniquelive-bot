@@ -1,6 +1,9 @@
 package main
 
 import (
+	"github.com/moniquelive/moniquelive-bot/internal/commands"
+	"github.com/moniquelive/moniquelive-bot/internal/roster"
+
 	"bytes"
 	_ "embed"
 	"fmt"
@@ -16,7 +19,7 @@ import (
 //go:embed .oauth
 var oauth string
 
-var config configType
+var cmd commands.Commands
 
 const (
 	channel  = "moniquelive"
@@ -36,11 +39,11 @@ const (
 )
 
 func init() {
-	config.reload()
+	cmd.Reload()
 }
 
 func main() {
-	roster := NewRoster()
+	rstr := roster.New()
 	client := twitch.NewClient(username, oauth)
 
 	client.OnConnect(func() {
@@ -58,18 +61,18 @@ func main() {
 
 	client.OnUserJoinMessage(func(message twitch.UserJoinMessage) {
 		log.Println(colorGreen, "*** OnUserJoinMessage >>>", message.User, colorReset)
-		roster.AddUser(message.User)
+		rstr.AddUser(message.User)
 	})
 
 	client.OnUserPartMessage(func(message twitch.UserPartMessage) {
 		log.Println(colorRed, "*** OnUserPartMessage <<<", message.User, colorReset)
-		roster.RemoveUser(message.User)
+		rstr.RemoveUser(message.User)
 	})
 
 	client.OnNamesMessage(func(message twitch.NamesMessage) {
 		log.Println(colorWhite, "*** OnNamesMessage:", len(message.Users), colorReset)
 		for _, user := range message.Users {
-			roster.AddUser(user)
+			rstr.AddUser(user)
 		}
 	})
 
@@ -88,19 +91,19 @@ func main() {
 		if len(split) > 1 {
 			cmdLine = strings.Join(split[1:], " ")
 		}
-		responses, ok := config.actionResponses[action]
+		responses, ok := cmd.ActionResponses[action]
 		if ok {
 			for _, response := range responses {
-				parsed, err := parseTemplate(response, roster, cmdLine)
+				parsed, err := parseTemplate(response, rstr, cmdLine)
 				if err != nil {
 					log.Println("erro de template:", err)
 					return
 				}
 				client.Say(channel, parsed)
 			}
-			if logs := config.actionLogs[action]; len(logs) > 0 {
+			if logs := cmd.ActionLogs[action]; len(logs) > 0 {
 				for _, l := range logs {
-					parsed, err := parseTemplate(l, roster, cmdLine)
+					parsed, err := parseTemplate(l, rstr, cmdLine)
 					if err != nil {
 						log.Println("erro de template:", err)
 						return
@@ -112,7 +115,7 @@ func main() {
 		}
 
 		// pula comandos marcados para ignorar
-		for _, ignoredCommand := range config.IgnoredCommands {
+		for _, ignoredCommand := range cmd.IgnoredCommands {
 			if strings.HasPrefix(message.Message, ignoredCommand) {
 				return
 			}
@@ -161,7 +164,7 @@ func watchCommandsFSChange(watcher *fsnotify.Watcher) {
 				if event.Op&fsnotify.Write == fsnotify.Write {
 					log.Println("watchCommandsFSChange > modified file:", event.Name)
 					time.Sleep(1 * time.Second)
-					config.reload()
+					cmd.Reload()
 				}
 				if event.Op&fsnotify.Create == fsnotify.Create && strings.HasSuffix(event.Name, "commands.json") {
 					log.Println("watchCommandsFSChange > re-watching:", event.Name)
@@ -188,22 +191,19 @@ func watchCommandsFSChange(watcher *fsnotify.Watcher) {
 	}
 }
 
-func parseTemplate(str string, r *roster, cmdLine string) (_ string, err error) {
-	fm := template.FuncMap{
-		"keys": keys,
-	}
+func parseTemplate(str string, r *roster.Roster, cmdLine string) (_ string, err error) {
 	var vars struct {
-		Roster   roster
+		Roster   roster.Roster
 		Commands string
 		CmdLine  string
-		Config   configType
+		Config   commands.Commands
 	}
 	vars.Roster = *r
-	vars.Commands = strings.Join(config.sortedActions, " ")
+	vars.Commands = strings.Join(cmd.SortedActions, " ")
 	vars.CmdLine = cmdLine
-	vars.Config = config
+	vars.Config = cmd
 
-	tmpl, err := template.New("json").Funcs(fm).Parse(str)
+	tmpl, err := template.New("json").Parse(str)
 	if err != nil {
 		return
 	}

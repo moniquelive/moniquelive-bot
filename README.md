@@ -8,8 +8,7 @@
 
 # Brainstorm
 
-- [ ] tornar o type roster internal
-- [ ] renomear config.go para commands.go
+- [ ] adicionar comando !pc/!spec com specs da maquina
 - [ ] comando !ban com sorteio de motivos aleatorios
 - [ ] fator de correção no !roster (-3)
 - [ ] !projeto do dia (!today)
@@ -35,3 +34,5 @@
 - [x] bookmark !blog, !twitter, !instagram
 - [x] log colorido
 - [x] persistir lista de usuarios (roster) no redis, quando disponivel
+- [x] tornar o type roster internal
+- [x] renomear config.go para commands.go
