@@ -8,6 +8,7 @@
 
 # Brainstorm
 
+- [ ] adicionar comando !music com "wmctrl -lx A -f a.awk"
 - [ ] adicionar comando !pc/!spec com specs da maquina
 - [ ] comando !ban com sorteio de motivos aleatorios
 - [ ] fator de correção no !roster (-3)
