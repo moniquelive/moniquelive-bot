@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/moniquelive/moniquelive-bot/internal/commands"
+	"github.com/moniquelive/moniquelive-bot/internal/media"
 	"github.com/moniquelive/moniquelive-bot/internal/roster"
 
 	"bytes"
@@ -45,6 +46,11 @@ func init() {
 func main() {
 	rstr := roster.New()
 	client := twitch.NewClient(username, oauth)
+	player, cancel, err := media.New()
+	if err != nil {
+		log.Panicln("media.New(): ", err)
+	}
+	defer cancel()
 
 	client.OnConnect(func() {
 		log.Println("*** OnConnect") // OnConnect attach callback to when a connection has been established
@@ -77,7 +83,7 @@ func main() {
 	})
 
 	client.OnPrivateMessage(func(message twitch.PrivateMessage) {
-		setColorForUser(message.User.Name, message.Message)
+		setColorForUser(message.User.Name)
 		log.Printf("%s (%v): %s%s\n", message.User.DisplayName, message.User.ID, message.Message, colorReset)
 		//if message.User.ID == moniqueId {
 		//}
@@ -93,22 +99,27 @@ func main() {
 		}
 		responses, ok := cmd.ActionResponses[action]
 		if ok {
-			for _, response := range responses {
-				parsed, err := parseTemplate(response, rstr, cmdLine)
+			for _, unparsedResponse := range responses {
+				parsedResponse, err := parseTemplate(unparsedResponse, rstr, cmdLine, player)
 				if err != nil {
-					log.Println("erro de template:", err)
+					// TODO: SE LIVRAR DESTE LIXOOOOOOOOO
+					split := strings.Split(err.Error(), ": ")
+					errMsg := split[len(split)-1]
+					errMsg = strings.ToUpper(errMsg[0:1])+errMsg[1:]
+					client.Say(channel, "/color red")
+					client.Say(channel, "/me "+errMsg)
 					return
 				}
-				client.Say(channel, parsed)
+				client.Say(channel, parsedResponse)
 			}
 			if logs := cmd.ActionLogs[action]; len(logs) > 0 {
-				for _, l := range logs {
-					parsed, err := parseTemplate(l, rstr, cmdLine)
+				for _, unparsedLog := range logs {
+					parsedLog, err := parseTemplate(unparsedLog, rstr, cmdLine, player)
 					if err != nil {
 						log.Println("erro de template:", err)
 						return
 					}
-					fmt.Println(parsed)
+					fmt.Println(parsedLog)
 				}
 			}
 			return
@@ -144,7 +155,7 @@ func main() {
 	}
 }
 
-func setColorForUser(userName string, message string) {
+func setColorForUser(userName string) {
 	switch userName {
 	case "acaverna", "streamlabs", "streamholics", "moniquelive_bot":
 		log.Println(colorCyan)
@@ -191,14 +202,21 @@ func watchCommandsFSChange(watcher *fsnotify.Watcher) {
 	}
 }
 
-func parseTemplate(str string, r *roster.Roster, cmdLine string) (_ string, err error) {
+func parseTemplate(
+	str string,
+	r *roster.Roster,
+	cmdLine string,
+	p *media.Player,
+) (_ string, err error) {
 	var vars struct {
 		Roster   roster.Roster
+		Player   media.Player
 		Commands string
 		CmdLine  string
 		Config   commands.Commands
 	}
 	vars.Roster = *r
+	vars.Player = *p
 	vars.Commands = strings.Join(cmd.SortedActions, " ")
 	vars.CmdLine = cmdLine
 	vars.Config = cmd

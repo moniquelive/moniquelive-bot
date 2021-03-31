@@ -8,7 +8,7 @@
 
 # Brainstorm
 
-- [ ] adicionar comando !music com "wmctrl -lx A -f a.awk"
+- [ ] corrigir comando !help sem argumentos
 - [ ] adicionar comando !pc/!spec com specs da maquina
 - [ ] comando !ban com sorteio de motivos aleatorios
 - [ ] fator de correção no !roster (-3)
@@ -37,3 +37,4 @@
 - [x] persistir lista de usuarios (roster) no redis, quando disponivel
 - [x] tornar o type roster internal
 - [x] renomear config.go para commands.go
+- [x] adicionar comando !music com DBUS!
