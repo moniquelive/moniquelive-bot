@@ -9,13 +9,15 @@
 # Brainstorm
 
 - [ ] corrigir comando !help sem argumentos
-- [ ] adicionar comando !pc/!spec com specs da maquina
+- [ ] comando !uptime - informa quanto tempo a live está online
+- [ ] comando !upside - https://en.wikipedia.org/wiki/Transformation_of_text#Upside-down_text
 - [ ] comando !ban com sorteio de motivos aleatorios
-- [ ] fator de correção no !roster (-3)
-- [ ] !projeto do dia (!today)
+- [ ] comando !projeto do dia (!today)
+- [ ] comando !os/!pc/!spec com specs da maquina
+- [ ] comando !skip - abrir votação de x segundos para pular musica se maioria concordar
 - [ ] timers (alonga, hidrata, etc.)
 - [ ] webserver com api / layer de roster ou chamar obs websocket
-- [ ] timeout (throttle) para comandos
+- [ ] ? timeout (throttle) para comandos
 
 # DONE
 - [x] comandos em _en_ e _pt-br_
