@@ -188,6 +188,31 @@
         "/color YellowGreen",
         "/me {{ .Player.CurrentSong }}"
       ]
+    },
+    {
+      "help": "Shows all bettertv emojis",
+      "ajuda": "Mostra todos os emojis da bettertv",
+      "actions": [
+        "!bttv",
+        "!b",
+        "!emoji"
+      ],
+      "responses": [
+        "catJAM KEKW AYAYA weSmart popCat WAYTOODANK kumaPls 200IQ CuteDog miyanoHype CouldYouNot HAMDANCE elmoFire CarltonPls chikaPls"
+      ]
+    },
+    {
+      "help": "Shows the Spotify playlist link",
+      "ajuda": "Mostra o link da playlist do Spotify",
+      "actions": [
+        "!spotify",
+        "!playlist",
+        "!list"
+      ],
+      "responses": [
+        "/color YellowGreen",
+        "/me https://open.spotify.com/playlist/6tPcPBeTEoPqaZcR03IzwN?si=yuQXN9RpSWyckstQKjRFpA"
+      ]
     }
   ]
 }
