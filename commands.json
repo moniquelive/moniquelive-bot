@@ -213,6 +213,39 @@
         "/color YellowGreen",
         "/me https://open.spotify.com/playlist/6tPcPBeTEoPqaZcR03IzwN?si=yuQXN9RpSWyckstQKjRFpA"
       ]
+    },
+    {
+      "help": "Shows Monique's Linux flavor",
+      "ajuda": "Mostra a distro Linux da Monique",
+      "actions": [
+        "!linux",
+        "!os",
+        "!sistema"
+      ],
+      "responses": [
+        "/color YellowGreen",
+        "/me Pop OS v20.10 (https://pop.system76.com/)"
+      ]
+    },
+    {
+      "help": "Shows Monique's battlestation config",
+      "ajuda": "Mostra spec da lanhouse da Monique",
+      "actions": [
+        "!spec",
+        "!pc"
+      ],
+      "responses": [
+        "/color YellowGreen", "/me Processador AMD Ryzen Threadripper 3970X (64) @ 4.000GHz",
+        "/color SpringGreen", "/me 64 GB de Memória RAM DDR3 1600MHz",
+        "/color YellowGreen", "/me Placa de Vídeo nVidia RTX 3080",
+        "/color SpringGreen", "/me SSD Samsung 970 EVO Plus (2TB)",
+        "/color YellowGreen", "/me Teclado https://ergodox-ez.com/",
+        "/color SpringGreen", "/me Mouse Logitech MX Master 3",
+        "/color YellowGreen", "/me Monitores Dell UP3216Q && LG HDR 4K",
+        "/color SpringGreen", "/me Câmera Logitech Brio 4K",
+        "/color YellowGreen", "/me Microfone Shure Inc. MV5",
+        "/color SpringGreen", "/me iPad as vezes para escrevinhar na tela..."
+      ]
     }
   ]
 }
