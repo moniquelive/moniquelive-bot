@@ -246,6 +246,18 @@
         "/color YellowGreen", "/me Microfone Shure Inc. MV5",
         "/color SpringGreen", "/me iPad as vezes para escrevinhar na tela..."
       ]
+    },
+    {
+      "help": "Shows your message upside down / umop apisdn",
+      "ajuda": "Mostra sua frase de ponta-cabeça (cabeça pra baixo)",
+      "actions": [
+        "!upside",
+        "!inv"
+      ],
+      "responses": [
+        "/color YellowGreen",
+        "/me {{ .Command.Upside .CmdLine }}"
+      ]
     }
   ]
 }
