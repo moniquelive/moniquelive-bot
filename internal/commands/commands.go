@@ -26,6 +26,9 @@ type Commands struct {
 }
 
 func (c Commands) Ajuda(cmdLine string) string {
+	if cmdLine == "" {
+		cmdLine = "ajuda"
+	}
 	if cmdLine[0] != '!' {
 		cmdLine = "!" + cmdLine
 	}
@@ -37,6 +40,9 @@ func (c Commands) Ajuda(cmdLine string) string {
 }
 
 func (c Commands) Help(cmdLine string) string {
+	if cmdLine == "" {
+		cmdLine = "help"
+	}
 	if cmdLine[0] != '!' {
 		cmdLine = "!" + cmdLine
 	}

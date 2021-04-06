@@ -159,7 +159,7 @@
       ],
       "responses": [
         "/color goldenrod",
-        "/me {{ .Config.Help .CmdLine }}"
+        "/me {{ .Command.Help .CmdLine }}"
       ]
     },
     {
@@ -172,7 +172,7 @@
       ],
       "responses": [
         "/color goldenrod",
-        "/me {{ .Config.Ajuda .CmdLine }}"
+        "/me {{ .Command.Ajuda .CmdLine }}"
       ]
     },
     {

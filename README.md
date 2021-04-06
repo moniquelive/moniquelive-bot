@@ -8,7 +8,6 @@
 
 # Brainstorm
 
-- [ ] corrigir comando !help sem argumentos
 - [ ] comando !uptime - informa quanto tempo a live está online
 - [ ] comando !upside - https://en.wikipedia.org/wiki/Transformation_of_text#Upside-down_text
 - [ ] comando !ban com sorteio de motivos aleatorios
@@ -40,3 +39,4 @@
 - [x] tornar o type roster internal
 - [x] renomear config.go para commands.go
 - [x] adicionar comando !music com DBUS!
+- [x] corrigir comando !help sem argumentos
