@@ -143,13 +143,13 @@ func (p *Player) createSkipPool(currentSong string) {
 						}
 
 						if dest == spotify {
-							canGoNext, errNext := p.getPlaybackStatus(obj)
+							canGoNext, errNext := p.CanGoNext(obj)
 							if errNext != nil {
 								continue
 							}
 
 							goNext := canGoNext.Value().(bool)
-							if goNext == false {
+							if goNext != true {
 								continue
 							}
 						}
@@ -181,9 +181,13 @@ func (p *Player) createSkipPool(currentSong string) {
 		}
 	}()
 
-	if tenPercent > 0 || int(tenPercent-len(p.skip)) > 0 {
-		time.Sleep(10 * time.Second)
-	}
-	ticker.Stop()
-	done <- true
+	go func() {
+		for {
+			if tenPercent > 0 || int(tenPercent-len(p.skip)) > 0 {
+				time.Sleep(10 * time.Second)
+			}
+			ticker.Stop()
+			done <- true
+		}
+	}()
 }
