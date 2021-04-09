@@ -8,13 +8,11 @@
 
 # Brainstorm
 
-- [ ] corrigir comando !help sem argumentos
-- [ ] comando !uptime - informa quanto tempo a live está online
-- [ ] comando !upside - https://en.wikipedia.org/wiki/Transformation_of_text#Upside-down_text
 - [ ] comando !ban com sorteio de motivos aleatorios
 - [ ] comando !projeto do dia (!today)
-- [ ] comando !os/!pc/!spec com specs da maquina
 - [ ] comando !skip - abrir votação de x segundos para pular musica se maioria concordar
+- [ ] assinar evento de "status da playlist" para exibir a musica atual quando trocar
+- [ ] comando !uptime - informa quanto tempo a live está online (api da twitch)
 - [ ] timers (alonga, hidrata, etc.)
 - [ ] webserver com api / layer de roster ou chamar obs websocket
 - [ ] ? timeout (throttle) para comandos
@@ -40,3 +38,7 @@
 - [x] tornar o type roster internal
 - [x] renomear config.go para commands.go
 - [x] adicionar comando !music com DBUS!
+- [x] corrigir comando !help sem argumentos
+- [x] comando !os com a versão do Linux
+- [x] comando !pc/!spec com specs da maquina
+- [x] comando !upside - https://en.wikipedia.org/wiki/Transformation_of_text#Upside-down_text

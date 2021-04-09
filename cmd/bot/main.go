@@ -105,7 +105,7 @@ func main() {
 					// TODO: SE LIVRAR DESTE LIXOOOOOOOOO
 					split := strings.Split(err.Error(), ": ")
 					errMsg := split[len(split)-1]
-					errMsg = strings.ToUpper(errMsg[0:1])+errMsg[1:]
+					errMsg = strings.ToUpper(errMsg[0:1]) + errMsg[1:]
 					client.Say(channel, "/color red")
 					client.Say(channel, "/me "+errMsg)
 					return
@@ -213,13 +213,13 @@ func parseTemplate(
 		Player   media.Player
 		Commands string
 		CmdLine  string
-		Config   commands.Commands
+		Command  commands.Commands
 	}
 	vars.Roster = *r
 	vars.Player = *p
 	vars.Commands = strings.Join(cmd.SortedActions, " ")
 	vars.CmdLine = cmdLine
-	vars.Config = cmd
+	vars.Command = cmd
 
 	tmpl, err := template.New("json").Parse(str)
 	if err != nil {
