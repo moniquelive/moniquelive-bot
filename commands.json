@@ -258,6 +258,18 @@
         "/color YellowGreen",
         "/me {{ .Command.Upside .CmdLine }}"
       ]
+    },
+    {
+      "help": "Skip current playing track (open vote)",
+      "ajuda": "Pula a música que está tocando no momento (voto aberto)",
+      "actions": [
+        "!pular",
+        "!skip"
+      ],
+      "responses": [
+        "/color YellowGreen",
+        "/me {{ .Player.SkipCurrentSong .User }}"
+      ]
     }
   ]
 }

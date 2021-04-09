@@ -46,7 +46,7 @@ func init() {
 func main() {
 	rstr := roster.New()
 	client := twitch.NewClient(username, oauth)
-	player, cancel, err := media.New()
+	player, cancel, err := media.New(rstr, client, channel)
 	if err != nil {
 		log.Panicln("media.New(): ", err)
 	}
@@ -91,6 +91,7 @@ func main() {
 		if message.Message == "!" || message.Message[0] != '!' {
 			return
 		}
+		user := message.User.DisplayName
 		split := strings.Split(message.Message, " ")
 		action := split[0]
 		cmdLine := ""
@@ -100,7 +101,7 @@ func main() {
 		responses, ok := cmd.ActionResponses[action]
 		if ok {
 			for _, unparsedResponse := range responses {
-				parsedResponse, err := parseTemplate(unparsedResponse, rstr, cmdLine, player)
+				parsedResponse, err := parseTemplate(unparsedResponse, rstr, cmdLine, user, player)
 				if err != nil {
 					// TODO: SE LIVRAR DESTE LIXOOOOOOOOO
 					split := strings.Split(err.Error(), ": ")
@@ -114,7 +115,7 @@ func main() {
 			}
 			if logs := cmd.ActionLogs[action]; len(logs) > 0 {
 				for _, unparsedLog := range logs {
-					parsedLog, err := parseTemplate(unparsedLog, rstr, cmdLine, player)
+					parsedLog, err := parseTemplate(unparsedLog, rstr, cmdLine, user, player)
 					if err != nil {
 						log.Println("erro de template:", err)
 						return
@@ -206,6 +207,7 @@ func parseTemplate(
 	str string,
 	r *roster.Roster,
 	cmdLine string,
+	user string,
 	p *media.Player,
 ) (_ string, err error) {
 	var vars struct {
@@ -213,6 +215,7 @@ func parseTemplate(
 		Player   media.Player
 		Commands string
 		CmdLine  string
+		User     string
 		Command  commands.Commands
 	}
 	vars.Roster = *r
@@ -220,6 +223,7 @@ func parseTemplate(
 	vars.Commands = strings.Join(cmd.SortedActions, " ")
 	vars.CmdLine = cmdLine
 	vars.Command = cmd
+	vars.User = user
 
 	tmpl, err := template.New("json").Parse(str)
 	if err != nil {

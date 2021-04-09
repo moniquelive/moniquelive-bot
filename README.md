@@ -10,7 +10,6 @@
 
 - [ ] comando !ban com sorteio de motivos aleatorios
 - [ ] comando !projeto do dia (!today)
-- [ ] comando !skip - abrir votação de x segundos para pular musica se maioria concordar
 - [ ] assinar evento de "status da playlist" para exibir a musica atual quando trocar
 - [ ] comando !uptime - informa quanto tempo a live está online (api da twitch)
 - [ ] timers (alonga, hidrata, etc.)
@@ -42,3 +41,4 @@
 - [x] comando !os com a versão do Linux
 - [x] comando !pc/!spec com specs da maquina
 - [x] comando !upside - https://en.wikipedia.org/wiki/Transformation_of_text#Upside-down_text
+- [x] comando !skip - abrir votação de 10 segundos para pular musica se maioria concordar
