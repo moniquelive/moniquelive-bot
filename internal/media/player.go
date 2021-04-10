@@ -49,7 +49,8 @@ func (p Player) SkipCurrentSong(user string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	p.createSkipPool(currentSong)
+
+	p.createSkipPool(user, currentSong)
 
 	return "", nil
 }
@@ -111,7 +112,10 @@ func (p *Player) CanGoNext(obj dbus.BusObject) (dbus.Variant, error) {
 	return canGoNextStatus, nil
 }
 
-func (p *Player) createSkipPool(currentSong string) {
+func (p *Player) createSkipPool(user string, currentSong string) {
+	// Initialize skip
+	p.skip = make(map[string]bool)
+
 	ticker := time.NewTicker(1 * time.Second)
 	done := make(chan bool)
 
@@ -124,11 +128,18 @@ func (p *Player) createSkipPool(currentSong string) {
 		currentSong = strings.Join(splitSong, " - ")
 	}
 
+	// push user to map
+	p.skip[user] = true
+
 	go func() {
 		for {
 			select {
 			case <-done:
 				if tenPercent == 0 || int(tenPercent-len(p.skip)) <= 0 {
+
+					// de-initialize skip
+					p.skip = nil
+
 					for _, dest := range []string{spotify, vlc} {
 						obj := p.conn.Object(dest, "/org/mpris/MediaPlayer2")
 
@@ -167,6 +178,9 @@ func (p *Player) createSkipPool(currentSong string) {
 					p.client.Say(p.channel, "/me Não tem como passar pra frente loucos")
 					return
 				}
+
+				// de-initialize skip
+				p.skip = nil
 
 				p.client.Say(p.channel, "/color blue")
 				p.client.Say(p.channel, "/me a música não foi pulada")
