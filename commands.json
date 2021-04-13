@@ -76,7 +76,7 @@
       ],
       "responses": [
         "/color blue",
-        "/me {{ len .Roster }}"
+        "/me {{ len .Roster }} loucos no hospício... 👀"
       ],
       "logs": [
         "{{ .Roster.Keys }}"
