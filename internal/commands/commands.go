@@ -41,6 +41,8 @@ func init() {
 	for i, c := range "&_?!\"'.,;" {
 		charMap[c] = punct[i]
 	}
+	charMap['('] = ')'
+	charMap[')'] = '('
 }
 
 func fillMap(from, to rune, slice []rune) {
