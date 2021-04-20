@@ -7,6 +7,8 @@ require (
 	github.com/gempir/go-twitch-irc/v2 v2.5.0
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/godbus/dbus/v5 v5.0.4
+	github.com/gorilla/websocket v1.4.2
 	github.com/onsi/ginkgo v1.15.2 // indirect
 	github.com/onsi/gomega v1.11.0 // indirect
+	github.com/sirupsen/logrus v1.8.1
 )

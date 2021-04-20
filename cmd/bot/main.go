@@ -1,15 +1,16 @@
 package main
 
 import (
-	"github.com/moniquelive/moniquelive-bot/internal/commands"
-	"github.com/moniquelive/moniquelive-bot/internal/twitch"
-
 	_ "embed"
-	"log"
+	"net/http"
 	"strings"
 	"time"
 
+	"github.com/moniquelive/moniquelive-bot/internal/commands"
+	"github.com/moniquelive/moniquelive-bot/internal/twitch"
+
 	"github.com/fsnotify/fsnotify"
+	"github.com/sirupsen/logrus"
 )
 
 const username = "moniquelive_bot"
@@ -18,6 +19,8 @@ const username = "moniquelive_bot"
 var oauth string
 
 var cmd commands.Commands
+
+var log = logrus.WithField("package", "main")
 
 func init() {
 	cmd.Reload()
@@ -38,6 +41,24 @@ func main() {
 
 	watchCommandsFSChange(watcher)
 
+	//
+	// Start websocket server
+	//
+	log.Println("Listening ...")
+	router := http.NewServeMux()
+	router.Handle("/ws", http.HandlerFunc(wsHandler))
+
+	// start server in a goroutine
+	srv := &http.Server{Addr: ":9090", Handler: router}
+	go func() {
+		if err := srv.ListenAndServe(); err != http.ErrServerClosed {
+			log.Fatal("ListenAndServe:", err)
+		}
+	}()
+
+	//
+	// Start IRC loop
+	//
 	err = client.Connect()
 	if err != nil {
 		panic(err)
