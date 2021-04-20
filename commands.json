@@ -219,7 +219,9 @@
       "ajuda": "Mostra a distro Linux da Monique",
       "actions": [
         "!linux",
+        "!distro",
         "!os",
+        "!so",
         "!sistema"
       ],
       "responses": [
@@ -257,6 +259,34 @@
       "responses": [
         "/color YellowGreen",
         "/me {{ .Command.Upside .CmdLine }}"
+      ]
+    },
+    {
+      "help": "Shows the Twitch schedule",
+      "ajuda": "Mostra a agenda da Twitch",
+      "actions": [
+        "!agenda",
+        "!schedule",
+        "!horario",
+        "!lives"
+      ],
+      "responses": [
+        "/color YellowGreen",
+        "/me https://www.twitch.tv/moniquelive/schedule"
+      ]
+    },
+    {
+      "help": "Shows the streamer's keyboard model",
+      "ajuda": "Mostra o modelo do teclado da Mo",
+      "actions": [
+        "!teclado",
+        "!keyboard",
+        "!keyb",
+        "!teclas"
+      ],
+      "responses": [
+        "/color YellowGreen",
+        "/me Ergodox EZ (https://ergodox-ez.com/)"
       ]
     }
   ]
