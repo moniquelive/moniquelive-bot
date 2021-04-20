@@ -8,6 +8,7 @@ import (
 
 	"github.com/godbus/dbus/v5"
 	"github.com/gorilla/websocket"
+	"github.com/moniquelive/moniquelive-bot/internal/twitch"
 )
 
 type SongInfo struct {
@@ -16,7 +17,7 @@ type SongInfo struct {
 	Artist string `json:"artist"`
 }
 
-func listenToDbus(ws *websocket.Conn, done chan struct{}) error {
+func listenToDbus(ws *websocket.Conn, done chan struct{}, client *twitch.Twitch) error {
 	conn, err := dbus.ConnectSessionBus()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Failed to connect to session bus:", err)
@@ -72,7 +73,10 @@ func listenToDbus(ws *websocket.Conn, done chan struct{}) error {
 			if err != nil {
 				return err
 			}
-			log.Println(artist + " - " + title + " - " + artUrl)
+			info := artist + " - " + title + " - " + artUrl
+			log.Println(info)
+			client.Say("/color Chocolate")
+			client.Say("/me " + info)
 		}
 	}
 }

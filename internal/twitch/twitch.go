@@ -31,20 +31,20 @@ const (
 	colorReset   = "\033[0m"
 )
 
-type twitch struct {
+type Twitch struct {
 	client *irc.Client
 	cmd    *commands.Commands
 	player *media.Player
 	rstr   *roster.Roster
 }
 
-func New(username, oauth string, cmd *commands.Commands) (*twitch, func(), error) {
+func New(username, oauth string, cmd *commands.Commands) (*Twitch, func(), error) {
 	player, cancel, err := media.New()
 	if err != nil {
 		return nil, nil, err
 	}
 	client := irc.NewClient(username, oauth)
-	t := &twitch{
+	t := &Twitch{
 		client: client,
 		cmd:    cmd,
 		player: player,
@@ -52,10 +52,10 @@ func New(username, oauth string, cmd *commands.Commands) (*twitch, func(), error
 	}
 	client.OnConnect(func() {
 		log.Println("*** OnConnect") // OnConnect attach callback to when a connection has been established
-		client.Say(channel, "/color seagreen")
-		client.Say(channel, "/me Tô na área!")
+		t.Say("/color seagreen")
+		t.Say("/me Tô na área!")
 		// client.Say(channel, "/slow 1")
-		client.Say(channel, "/uniquechat")
+		t.Say("/uniquechat")
 	})
 
 	client.OnUserJoinMessage(func(message irc.UserJoinMessage) {
@@ -103,11 +103,11 @@ func New(username, oauth string, cmd *commands.Commands) (*twitch, func(), error
 					split := strings.Split(err.Error(), ": ")
 					errMsg := split[len(split)-1]
 					errMsg = strings.ToUpper(errMsg[0:1]) + errMsg[1:]
-					client.Say(channel, "/color red")
-					client.Say(channel, "/me "+errMsg)
+					t.Say("/color red")
+					t.Say("/me "+errMsg)
 					return
 				}
-				client.Say(channel, parsedResponse)
+				t.Say(parsedResponse)
 			}
 			if logs := cmd.ActionLogs[action]; len(logs) > 0 {
 				for _, unparsedLog := range logs {
@@ -131,8 +131,8 @@ func New(username, oauth string, cmd *commands.Commands) (*twitch, func(), error
 
 		// comando desconhecido...
 		if strings.HasPrefix(message.Message, "!") {
-			client.Say(channel, "/color firebrick")
-			client.Say(channel, "/me não conheço esse: "+message.Message)
+			t.Say("/color firebrick")
+			t.Say("/me não conheço esse: "+message.Message)
 		}
 	})
 
@@ -141,11 +141,15 @@ func New(username, oauth string, cmd *commands.Commands) (*twitch, func(), error
 	return t, cancel, nil
 }
 
-func (t twitch) Connect() error {
+func (t Twitch) Say(msg string) {
+	t.client.Say(channel, msg)
+}
+
+func (t Twitch) Connect() error {
 	return t.client.Connect()
 }
 
-func (t twitch) parseTemplate(
+func (t Twitch) parseTemplate(
 	str string,
 	cmdLine string,
 ) (_ string, err error) {

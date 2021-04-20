@@ -8,13 +8,24 @@
 
 # Brainstorm
 
+- [ ] fazer index.js reconectar no websocket quando o bot parar
+- [ ] comando !m pode disparar o evento de WS para mostrar a musica no OBS
+- [ ] comando !selfie para tocar video de auto-apresentacao (ola, sou a Monique...)
 - [ ] comando !ban com sorteio de motivos aleatorios
+  - foi banid@ por curtir javascript
+  - foi banid@ por perguntar em quais linguagens a strimer programa
+  - foi banid@ por dar commit na master
+  - foi banid@ por dar DELETE sem WHERE
+  - tirou 1 no d20 e foi banido...
+  - ban find ./moniquelive -name ${target} -delete
+  - foi bando por esquecer o ;
 - [ ] comando !projeto do dia (!today)
 - [ ] comando !skip - abrir votação de x segundos para pular musica se maioria concordar
-- [ ] assinar evento de "status da playlist" para exibir a musica atual quando trocar
-- [ ] comando !uptime - informa quanto tempo a live está online (api da twitch)
+- [ ] (api da twitch) comando !uptime - informa quanto tempo a live está online
+- [ ] (api da twitch) comando !schedule - mostra a agenda da twitch
 - [ ] timers (alonga, hidrata, etc.)
 - [ ] webserver com api / layer de roster ou chamar obs websocket
+    - [ ] colocar notificação de musica no layer
 - [ ] ? timeout (throttle) para comandos
 
 # DONE
@@ -42,3 +53,7 @@
 - [x] comando !os com a versão do Linux
 - [x] comando !pc/!spec com specs da maquina
 - [x] comando !upside - https://en.wikipedia.org/wiki/Transformation_of_text#Upside-down_text
+- [x] assinar evento de "status da playlist" para exibir a musica atual quando trocar
+  - POC ok
+  - refatorar parte do bot que envia mensagem, para enfileirar e evitar concorrencia
+

@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/websocket"
+	"github.com/moniquelive/moniquelive-bot/internal/twitch"
 )
 
 var upgrader = websocket.Upgrader{
@@ -14,7 +15,11 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-func wsHandler(w http.ResponseWriter, r *http.Request) {
+type wsHandler struct {
+	client *twitch.Twitch
+}
+
+func (ws wsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer log.Println("wsHandler: Exiting from wsHandler")
 
 	// Upgrade HTTP connection
@@ -29,7 +34,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 
 	done := make(chan struct{})
 	go func() {
-		if err := listenToDbus(conn, done); err != nil {
+		if err := listenToDbus(conn, done, ws.client); err != nil {
 			log.Errorln("listenToDbus:", err)
 			return
 		}

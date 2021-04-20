@@ -46,7 +46,7 @@ func main() {
 	//
 	log.Println("Listening ...")
 	router := http.NewServeMux()
-	router.Handle("/ws", http.HandlerFunc(wsHandler))
+	router.Handle("/ws", wsHandler{client: client})
 
 	// start server in a goroutine
 	srv := &http.Server{Addr: ":9090", Handler: router}
