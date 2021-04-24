@@ -1,3 +1,4 @@
 cmd/bot/.oauth
+internal/twitch/vox_*
 
 .idea

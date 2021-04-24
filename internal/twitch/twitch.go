@@ -15,9 +15,10 @@ import (
 )
 
 const (
-	channel = "moniquelive"
 	//moniqueID = "4930146"
+	channel      = "moniquelive"
 	streamlabsID = "105166207"
+	TtsReward    = "e706421e-01f7-48fd-a4c6-4393d1ba4ec8"
 )
 
 const (
@@ -48,7 +49,7 @@ func New(username, oauth string, cmd *commands.Commands) (*Twitch, func(), error
 		client: client,
 		cmd:    cmd,
 		player: player,
-		rstr: roster.New(),
+		rstr:   roster.New(),
 	}
 	client.OnConnect(func() {
 		log.Println("*** OnConnect") // OnConnect attach callback to when a connection has been established
@@ -76,6 +77,10 @@ func New(username, oauth string, cmd *commands.Commands) (*Twitch, func(), error
 	})
 
 	client.OnPrivateMessage(func(message irc.PrivateMessage) {
+		if rewardID, ok := message.Tags["custom-reward-id"]; ok && rewardID == TtsReward {
+			ttsSpeak(message.Message)
+		}
+
 		setColorForUser(message.User.Name)
 		log.Printf("%s (%v): %s%s\n", message.User.DisplayName, message.User.ID, message.Message, colorReset)
 		//
@@ -104,7 +109,7 @@ func New(username, oauth string, cmd *commands.Commands) (*Twitch, func(), error
 					errMsg := split[len(split)-1]
 					errMsg = strings.ToUpper(errMsg[0:1]) + errMsg[1:]
 					t.Say("/color red")
-					t.Say("/me "+errMsg)
+					t.Say("/me " + errMsg)
 					return
 				}
 				t.Say(parsedResponse)
@@ -132,7 +137,7 @@ func New(username, oauth string, cmd *commands.Commands) (*Twitch, func(), error
 		// comando desconhecido...
 		if strings.HasPrefix(message.Message, "!") {
 			t.Say("/color firebrick")
-			t.Say("/me não conheço esse: "+message.Message)
+			t.Say("/me não conheço esse: " + message.Message)
 		}
 	})
 
