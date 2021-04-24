@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/godbus/dbus/v5"
 	"github.com/gorilla/websocket"
@@ -37,7 +36,7 @@ func listenToDbus(ws *websocket.Conn, done chan struct{}, client *twitch.Twitch)
 	dbusChan := make(chan *dbus.Signal, 10)
 	conn.Signal(dbusChan)
 	prevTrackID := ""
-	prevTrackIDTime := time.Now()
+	// prevTrackIDTime := time.Now()
 	for {
 		select {
 		case <-done:
@@ -53,11 +52,11 @@ func listenToDbus(ws *websocket.Conn, done chan struct{}, client *twitch.Twitch)
 			}
 			songData := metaData.(map[string]dbus.Variant)
 			trackID := songData["mpris:trackid"].Value().(string)
-			if trackID == prevTrackID && time.Now().Sub(prevTrackIDTime) < 2*time.Second {
+			if trackID == prevTrackID { //&& time.Now().Sub(prevTrackIDTime) < 2*time.Second {
 				//fmt.Println("skipping for", trackID)
 				continue
 			}
-			prevTrackIDTime = time.Now()
+			// prevTrackIDTime = time.Now()
 			prevTrackID = trackID
 			artist := songData["xesam:artist"].Value().([]string)[0]
 			title := songData["xesam:title"].Value().(string)
