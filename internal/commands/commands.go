@@ -43,6 +43,10 @@ func init() {
 	}
 	charMap['('] = ')'
 	charMap[')'] = '('
+	charMap['{'] = '}'
+	charMap['}'] = '{'
+	charMap['['] = ']'
+	charMap[']'] = '['
 }
 
 func fillMap(from, to rune, slice []rune) {
