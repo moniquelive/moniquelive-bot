@@ -269,6 +269,7 @@
         "!agenda",
         "!schedule",
         "!horario",
+        "!calendario",
         "!lives"
       ],
       "responses": [
