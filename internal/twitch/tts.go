@@ -151,7 +151,7 @@ func ttsSpeak(message string) {
 
 func ffplay(url string) {
 	const urlPrefix = "https://api.cybervox.ai"
-	cmd := fmt.Sprintf(`ffmpeg -i %q -filter:a "volume=6.0" -f wav - | ffplay -autoexit -nodisp -`,
+	cmd := fmt.Sprintf(`ffmpeg -i %q -filter:a "volume=5.0" -f wav - | ffplay -autoexit -nodisp -`,
 		urlPrefix+url)
 	fmt.Println("CMD:", cmd)
 	if err := exec.Command("bash", "-c", cmd).Run(); err != nil {
