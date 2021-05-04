@@ -196,10 +196,11 @@
       "actions": [
         "!bttv",
         "!b",
-        "!emoji"
+        "!emoji",
+        "!emote"
       ],
       "responses": [
-        "catJAM KEKW AYAYA weSmart popCat WAYTOODANK kumaPls 200IQ CuteDog miyanoHype CouldYouNot HAMDANCE elmoFire CarltonPls chikaPls"
+        "catJAM KEKW AYAYA weSmart popCat WAYTOODANK kumaPls 200IQ CuteDog miyanoHype CouldYouNot HAMDANCE elmoFire CarltonPls chikaPls nodeBounce"
       ]
     },
     {
@@ -303,6 +304,20 @@
       "responses": [
         "/color YellowGreen",
         "/me https://www.flipcode.com/archives/articles.shtml"
+      ]
+    },
+    {
+      "help": "Shows Demoscene tutorials url",
+      "ajuda": "Mostra a url dos tutoriais de Demoscene",
+      "actions": [
+        "!demo",
+        "!demos",
+        "!demoscene",
+        "!ds"
+      ],
+      "responses": [
+        "/color YellowGreen",
+        "/me https://demoscenetuts.monique.dev/"
       ]
     }
   ]
