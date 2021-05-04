@@ -107,7 +107,7 @@ func dial() (*websocket.Conn, *http.Response, error) {
 	return websocket.DefaultDialer.Dial("wss://api.cybervox.ai/ws?access_token="+token, nil)
 }
 
-func tts(ws *websocket.Conn, text, voice string) (response ttsResponse) {
+func tts(ws *websocket.Conn, responses <-chan ttsResponse, text, voice string) (response ttsResponse) {
 	request := ttsRequest{
 		Emit: "tts",
 		Payload: ttsRequestPayload{
@@ -116,36 +116,13 @@ func tts(ws *websocket.Conn, text, voice string) (response ttsResponse) {
 			Timestamp: time.Now().UnixNano(),
 		},
 	}
+	_ = ws.SetWriteDeadline(time.Now().Add(10 * time.Second))
 	if err := ws.WriteJSON(request); err != nil {
 		log.Println(err)
 		return
 	}
-	if err := ws.ReadJSON(&response); err != nil {
-		log.Println(err)
-		return
-	}
+	response = <-responses
 	return
-}
-
-func ttsSpeak(message string) {
-	var ws *websocket.Conn
-	var err error
-
-	if ws, _, err = dial(); err != nil {
-		log.Println(err)
-		return
-	}
-	defer func() {
-		_ = ws.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
-		_ = ws.Close()
-	}()
-
-	resp := tts(ws, message, "perola")
-	if !resp.Payload.Success {
-		log.Println("!Success:", resp.Payload.Reason)
-		return
-	}
-	ffplay(resp.Payload.AudioURL)
 }
 
 func ffplay(url string) {

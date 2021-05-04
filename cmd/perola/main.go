@@ -106,8 +106,8 @@ func main() {
 
 func handle(deliveries <-chan amqp.Delivery, done chan<- struct{}) {
 	const (
-		writeWait  = 10 * time.Second    // Time allowed to write the file to the client.
-		pongWait   = 30 * time.Second    // Time allowed to read the next pong message from the client.
+		writeWait  = 10 * time.Second    // Time allowed to write the data to the client.
+		pongWait   = 60 * time.Second    // Time allowed to read the next pong message from the client.
 		pingPeriod = (pongWait * 9) / 10 // Send pings to client with this period. Must be less than pongWait.
 	)
 	ws, _, err := dial()
@@ -124,6 +124,22 @@ func handle(deliveries <-chan amqp.Delivery, done chan<- struct{}) {
 		done <- struct{}{}
 	}()
 
+	ws.SetReadLimit(512)
+	responses := make(chan ttsResponse)
+	defer close(responses)
+	go func(ws *websocket.Conn, ch chan<- ttsResponse) {
+		_ = ws.SetReadDeadline(time.Now().Add(pongWait))
+		ws.SetPongHandler(func(string) error { ws.SetReadDeadline(time.Now().Add(pongWait)); return nil })
+		for {
+			var resp ttsResponse
+			if err := ws.ReadJSON(&resp); err != nil {
+				log.Debugln("NextReader:", err)
+				return
+			}
+			ch <- resp
+		}
+	}(ws, responses)
+
 	log.Debugln("Listening...")
 	for {
 		select {
@@ -138,7 +154,7 @@ func handle(deliveries <-chan amqp.Delivery, done chan<- struct{}) {
 				break
 			}
 			log.Infoln("DELIVERY:", message)
-			resp := tts(ws, message, "perola")
+			resp := tts(ws, responses, message, "perola")
 			if !resp.Payload.Success {
 				log.Println("!Success:", resp.Payload.Reason)
 				return
@@ -150,8 +166,8 @@ func handle(deliveries <-chan amqp.Delivery, done chan<- struct{}) {
 			ffplay(resp.Payload.AudioURL)
 		case <-pingTicker.C:
 			_ = ws.SetWriteDeadline(time.Now().Add(writeWait))
-			log.Debugln("Ping...")
-			if err := ws.WriteMessage(websocket.PingMessage, nil); err != nil {
+			//log.Debugln("Ping...")
+			if err := ws.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
 				log.Debugln("Ping:", err)
 				return
 			}
