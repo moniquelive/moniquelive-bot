@@ -8,6 +8,7 @@ require (
 	github.com/gempir/go-twitch-irc/v2 v2.5.0
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/godbus/dbus/v5 v5.0.4
+	github.com/google/uuid v1.2.0
 	github.com/gorilla/websocket v1.4.2
 	github.com/onsi/ginkgo v1.15.2 // indirect
 	github.com/onsi/gomega v1.11.0 // indirect
@@ -15,5 +16,6 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/sirupsen/logrus v1.8.1
 	github.com/smartystreets/goconvey v1.6.4 // indirect
+	github.com/streadway/amqp v1.0.0
 	moul.io/http2curl v1.0.0 // indirect
 )

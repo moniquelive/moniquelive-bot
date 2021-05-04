@@ -1,4 +1,4 @@
 cmd/bot/.oauth
-internal/twitch/vox_*
+vox_client_*
 
 .idea
