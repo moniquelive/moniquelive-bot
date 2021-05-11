@@ -8,7 +8,8 @@
 
 # Brainstorm
 
-- [ ] fazer index.js reconectar no websocket quando o bot parar
+- [ ] criar client-cli para postar/assinar filas do rabbitmq (Cobra SPF)
+- [ ] extrair microserviço de dbus / spotify
 - [ ] comando !m pode disparar o evento de WS para mostrar a musica no OBS
 - [ ] comando !selfie para tocar video de auto-apresentacao (ola, sou a Monique...)
 - [ ] comando !ban com sorteio de motivos aleatorios
@@ -27,6 +28,10 @@
 - [ ] webserver com api / layer de roster ou chamar obs websocket
     - [ ] colocar notificação de musica no layer
 - [ ] ? timeout (throttle) para comandos
+
+# Pipe dream
+
+- [ ] Mini-game na tela de #BRB
 
 # DONE
 - [x] comandos em _en_ e _pt-br_
@@ -56,4 +61,6 @@
 - [x] assinar evento de "status da playlist" para exibir a musica atual quando trocar
   - POC ok
   - refatorar parte do bot que envia mensagem, para enfileirar e evitar concorrencia
+- [x] fazer index.js reconectar no websocket quando o bot parar
+- [x] extrair microserviço de tts
 
