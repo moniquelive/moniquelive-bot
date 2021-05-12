@@ -1,0 +1,51 @@
+version: "3.7"
+
+networks:
+  caching_default:
+    external: true
+  rabbitmq_default:
+    external: true
+
+services:
+  dbus:
+    image: twitch-bot-dbus
+    build: dbus
+    environment:
+      - RABBITMQ_URL=amqp://moniquelivebot:moniquelivebot@rabbitmq/twitch
+    networks:
+      - rabbitmq_default
+    # DBUS stuff
+    privileged: true
+    user: "1000"
+    volumes:
+      - /run/user/1000/bus:/run/user/1000/bus
+
+  websocket:
+    image: twitch-bot-websocket
+    build: websocket
+    environment:
+      - RABBITMQ_URL=amqp://moniquelivebot:moniquelivebot@rabbitmq/twitch
+    ports:
+      - 9090:9090
+    networks:
+      - rabbitmq_default
+
+  perola:
+    image: twitch-bot-perola
+    build: perola
+    environment:
+      - RABBITMQ_URL=amqp://moniquelivebot:moniquelivebot@rabbitmq/twitch
+    networks:
+      - rabbitmq_default
+
+  twitch:
+    image: twitch-bot-twitch
+    build: twitch
+    environment:
+      - RABBITMQ_URL=amqp://moniquelivebot:moniquelivebot@rabbitmq/twitch
+      - REDIS_URL=redis:6379
+    networks:
+      - rabbitmq_default
+      - caching_default
+    volumes:
+      - ./commands.json:/commands.json:ro

@@ -94,7 +94,7 @@ func listenToDbus(channel *amqp.Channel, done chan os.Signal) error {
 	for {
 		select {
 		case <-done:
-			//log.Infoln("CAINDO FUERAAAAA!!!")
+			log.Infoln("CAINDO FUERAAAAA!!!")
 			return nil
 		case v := <-dbusChan:
 			data := v.Body[1].(map[string]dbus.Variant)
@@ -122,6 +122,7 @@ func listenToDbus(channel *amqp.Channel, done chan os.Signal) error {
 				Title:  title,
 				Artist: artist,
 			}
+			//log.Debugln(songInfo)
 			infoBytes, err := json.Marshal(songInfo)
 			if err != nil {
 				log.Errorln("listenToDbus > jsonMarshal:", err)

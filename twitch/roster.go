@@ -18,7 +18,7 @@ func notify() {
 }
 
 func init() {
-	red = redis.NewClient(&redis.Options{Addr: "127.0.0.1:6379"})
+	red = redis.NewClient(&redis.Options{Addr: redisURL})
 	if _, err := red.Ping().Result(); err != nil {
 		log.Println("RosterType.init > Sem redis...")
 		red = nil
