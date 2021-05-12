@@ -1,4 +1,4 @@
-cmd/bot/.oauth
+.oauth
 vox_client_*
 
 .idea
