@@ -1,4 +1,4 @@
-module github.com/moniquelive/moniquelive-bot/stack/perola
+module github.com/moniquelive/moniquelive-bot/perola
 
 go 1.16
 

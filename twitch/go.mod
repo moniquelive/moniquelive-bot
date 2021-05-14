@@ -1,4 +1,4 @@
-module github.com/moniquelive/moniquelive-bot/stack/twitch
+module github.com/moniquelive/moniquelive-bot/twitch
 
 go 1.16
 

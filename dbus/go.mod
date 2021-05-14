@@ -1,4 +1,4 @@
-module github.com/moniquelive/moniquelive-bot/stack/dbus
+module github.com/moniquelive/moniquelive-bot/dbus
 
 go 1.16
 

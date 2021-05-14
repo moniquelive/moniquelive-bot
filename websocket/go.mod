@@ -1,4 +1,4 @@
-module github.com/moniquelive/moniquelive-bot/stack/websocket
+module github.com/moniquelive/moniquelive-bot/websocket
 
 go 1.16
 
