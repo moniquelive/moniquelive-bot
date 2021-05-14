@@ -14,8 +14,9 @@ import (
 )
 
 const (
-	queueName = "ms.websocket"
-	topicName = "spotify_music_updated"
+	queueName           = "ms.websocket"
+	spotifyTopicName    = "spotify_music_updated"
+	ttsCreatedTopicName = "tts_created"
 )
 
 var (
@@ -94,7 +95,8 @@ func main() {
 	check(err)
 
 	log.Debugf("binding Queue %q to amq.topic", queueName)
-	err = channel.QueueBind(queueName, topicName, "amq.topic", false, nil)
+	err = channel.QueueBind(queueName, spotifyTopicName, "amq.topic", false, nil)
+	err = channel.QueueBind(queueName, ttsCreatedTopicName, "amq.topic", false, nil)
 	check(err)
 
 	log.Debugln("Setting QoS")
@@ -150,14 +152,13 @@ func handle(deliveries <-chan amqp.Delivery, ws chan<- []byte, done chan<- struc
 			return
 		}
 		message := string(delivery.Body)
+		_ = delivery.Ack(false)
 		if message == "" {
 			log.Debugln("empty message. ignoring...")
-			_ = delivery.Ack(false)
-			break
+			continue
 		}
 		log.Infoln("DELIVERY:", message)
 		ws <- delivery.Body
-		_ = delivery.Ack(false)
 	}
 }
 
