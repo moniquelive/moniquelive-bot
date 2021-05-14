@@ -1,7 +1,7 @@
 #-----------------------------------------------------------------------------
 FROM golang:alpine AS builder
 
-RUN apk add --no-cache upx git ca-certificates && update-ca-certificates
+RUN apk add --no-cache upx ca-certificates && update-ca-certificates
 
 ENV GO111MODULE=on \
   CGO_ENABLED=0 \
