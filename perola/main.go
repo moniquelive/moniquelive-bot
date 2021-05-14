@@ -13,13 +13,13 @@ import (
 )
 
 const (
-	queueName = "ms.tts"
-	topicName = "create_tts"
+	queueName           = "ms.tts"
+	createTtsTopicName  = "create_tts"
+	ttsCreatedTopicName = "tts_created"
 )
 
 var (
 	amqpURL  = os.Getenv("RABBITMQ_URL")
-	redisURL = os.Getenv("REDIS_URL")
 	log      = logrus.WithField("package", "main")
 )
 
@@ -62,7 +62,7 @@ func main() {
 	check(err)
 
 	log.Debugf("binding Queue %q to amq.topic", queueName)
-	err = channel.QueueBind(queueName, topicName, "amq.topic", false, nil)
+	err = channel.QueueBind(queueName, createTtsTopicName, "amq.topic", false, nil)
 	check(err)
 
 	log.Debugln("Setting QoS")
@@ -85,7 +85,7 @@ func main() {
 	check(err)
 
 	done := make(chan struct{})
-	go handle(deliveries, done)
+	go handle(deliveries, channel, done)
 
 	// wait for interrupt signal
 	stopChan := make(chan os.Signal, 1)
@@ -104,7 +104,7 @@ func main() {
 	log.Debugln("AMQP consumer shutdown.")
 }
 
-func handle(deliveries <-chan amqp.Delivery, done chan<- struct{}) {
+func handle(deliveries <-chan amqp.Delivery, channel *amqp.Channel, done chan<- struct{}) {
 	const (
 		writeWait  = 10 * time.Second    // Time allowed to write the data to the client.
 		pongWait   = 60 * time.Second    // Time allowed to read the next pong message from the client.
@@ -154,16 +154,22 @@ func handle(deliveries <-chan amqp.Delivery, done chan<- struct{}) {
 				break
 			}
 			log.Infoln("DELIVERY:", message)
-			resp := tts(ws, responses, message, "perola")
+			resp := tts(ws, responses, message, "douglas")
 			if !resp.Payload.Success {
 				log.Println("!Success:", resp.Payload.Reason)
 				return
 			}
 			_ = delivery.Ack(false)
-			// TODO: gerar evento de `tts_ready`
-			// - jogar audio no redis
-			// - publicar no topico `tts_ready`
-			ffplay(resp.Payload.AudioURL)
+			err = channel.Publish("amq.topic", ttsCreatedTopicName, false, false, amqp.Publishing{
+				ContentType:     "text/plain",
+				ContentEncoding: "utf-8",
+				DeliveryMode:    2,
+				Expiration:      "60000",
+				Body:            []byte("https://api.cybervox.ai" + resp.Payload.AudioURL),
+			})
+			if err != nil {
+				log.Errorln("handle > channel.Publish:", err)
+			}
 		case <-pingTicker.C:
 			_ = ws.SetWriteDeadline(time.Now().Add(writeWait))
 			//log.Debugln("Ping...")
