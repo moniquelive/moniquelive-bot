@@ -11,7 +11,7 @@ services:
     image: twitch-bot-dbus
     build: dbus
     environment:
-      - RABBITMQ_URL=amqp://moniquelivebot:moniquelivebot@rabbitmq/twitch
+      - RABBITMQ_URL=amqp://moniquelivebot:moniquelivebot@rabbitmq/twitch?heartbeat=600
     networks:
       - rabbitmq_default
     # DBUS stuff
@@ -24,7 +24,7 @@ services:
     image: twitch-bot-websocket
     build: websocket
     environment:
-      - RABBITMQ_URL=amqp://moniquelivebot:moniquelivebot@rabbitmq/twitch
+      - RABBITMQ_URL=amqp://moniquelivebot:moniquelivebot@rabbitmq/twitch?heartbeat=600
     ports:
       - 9090:9090
     networks:
@@ -34,7 +34,7 @@ services:
     image: twitch-bot-perola
     build: perola
     environment:
-      - RABBITMQ_URL=amqp://moniquelivebot:moniquelivebot@rabbitmq/twitch
+      - RABBITMQ_URL=amqp://moniquelivebot:moniquelivebot@rabbitmq/twitch?heartbeat=600
     networks:
       - rabbitmq_default
 
@@ -42,7 +42,7 @@ services:
     image: twitch-bot-twitch
     build: twitch
     environment:
-      - RABBITMQ_URL=amqp://moniquelivebot:moniquelivebot@rabbitmq/twitch
+      - RABBITMQ_URL=amqp://moniquelivebot:moniquelivebot@rabbitmq/twitch?heartbeat=600
       - REDIS_URL=redis:6379
     networks:
       - rabbitmq_default
