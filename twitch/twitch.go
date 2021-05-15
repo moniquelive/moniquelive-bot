@@ -2,11 +2,14 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 	"text/template"
 
 	irc "github.com/gempir/go-twitch-irc/v2"
+	"github.com/go-redis/redis"
 	"github.com/streadway/amqp"
 )
 
@@ -15,6 +18,7 @@ const (
 	channel      = "moniquelive"
 	streamlabsID = "105166207"
 	TtsReward    = "e706421e-01f7-48fd-a4c6-4393d1ba4ec8"
+	redisKey     = "twitch-bot:dbus:song-info"
 )
 
 const (
@@ -29,23 +33,55 @@ const (
 )
 
 type Twitch struct {
-	client *irc.Client
-	cmd    *Commands
-	//player *media.Player
+	client      *irc.Client
+	cmd         *Commands
 	rstr        *Roster
 	amqpChannel *amqp.Channel
+	player      *Player
+}
+
+type Player struct {
+	red *redis.Client
+}
+
+func NewPlayer() (*Player, error) {
+	redisURL := os.Getenv("REDIS_URL")
+	red = redis.NewClient(&redis.Options{Addr: redisURL})
+	if _, err := red.Ping().Result(); err != nil {
+		return nil, err
+	}
+	return &Player{red: red}, nil
+}
+
+func (p Player) CurrentSong() string {
+	infoBytes, err := red.Get(redisKey).Bytes()
+	if err != nil {
+		log.Errorln("CurrentSong.Get:", err)
+		return "sem músicas no momento..."
+	}
+	var songInfo struct {
+		ImgUrl string `json:"imgUrl"`
+		Title  string `json:"title"`
+		Artist string `json:"artist"`
+	}
+	err = json.Unmarshal(infoBytes, &songInfo)
+	if err != nil {
+		log.Errorln("CurrentSong.Unmarshal:", err)
+		return "sem músicas no momento..."
+	}
+	return songInfo.Artist + " - " + songInfo.Title + " - " + songInfo.ImgUrl
 }
 
 func NewTwitch(username, oauth string, cmd *Commands, amqpChannel *amqp.Channel) (*Twitch, error) {
-	//player, cancel, err := media.New()
-	//if err != nil {
-	//	return nil, nil, err
-	//}
+	player, err := NewPlayer()
+	if err != nil {
+		return nil, err
+	}
 	client := irc.NewClient(username, oauth)
 	t := &Twitch{
-		client: client,
-		cmd:    cmd,
-		//player: player,
+		client:      client,
+		cmd:         cmd,
+		player:      player,
 		rstr:        NewRoster(),
 		amqpChannel: amqpChannel,
 	}
@@ -166,8 +202,8 @@ func (t Twitch) parseTemplate(
 	cmdLine string,
 ) (_ string, err error) {
 	var vars struct {
-		Roster Roster
-		//Player   media.Player
+		Roster   Roster
+		Player   Player
 		Commands string
 		CmdLine  string
 		Command  Commands
@@ -175,7 +211,7 @@ func (t Twitch) parseTemplate(
 	vars.CmdLine = cmdLine
 	vars.Commands = strings.Join(t.cmd.SortedActions, " ")
 	vars.Command = *t.cmd
-	//vars.Player = *t.player
+	vars.Player = *t.player
 	vars.Roster = *t.rstr
 
 	tmpl, err := template.New("json").Parse(str)
