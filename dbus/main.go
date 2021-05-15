@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/go-redis/redis"
 	"github.com/godbus/dbus/v5"
 	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
@@ -16,11 +17,14 @@ import (
 
 const (
 	topicName = "spotify_music_updated"
+	redisKey = "twitch-bot:dbus:song-info"
 )
 
 var (
-	amqpURL = os.Getenv("RABBITMQ_URL")
-	log     = logrus.WithField("package", "main")
+	amqpURL  = os.Getenv("RABBITMQ_URL")
+	redisURL = os.Getenv("REDIS_URL")
+	log      = logrus.WithField("package", "main")
+	red      *redis.Client
 )
 
 type SongInfo struct {
@@ -35,6 +39,10 @@ func init() {
 		TimestampFormat: time.StampMilli,
 	})
 	logrus.SetLevel(logrus.TraceLevel) // sets log level
+	red = redis.NewClient(&redis.Options{Addr: redisURL})
+	if _, err := red.Ping().Result(); err != nil {
+		log.Fatalln("dbus.init > Sem redis...")
+	}
 }
 
 func check(err error) {
@@ -94,7 +102,7 @@ func listenToDbus(channel *amqp.Channel, done chan os.Signal) error {
 	for {
 		select {
 		case <-done:
-			log.Infoln("CAINDO FUERAAAAA!!!")
+			//log.Infoln("CAINDO FUERAAAAA!!!")
 			return nil
 		case v := <-dbusChan:
 			data := v.Body[1].(map[string]dbus.Variant)
@@ -115,6 +123,7 @@ func listenToDbus(channel *amqp.Channel, done chan os.Signal) error {
 			artist := songData["xesam:artist"].Value().([]string)[0]
 			title := songData["xesam:title"].Value().(string)
 			artUrl := songData["mpris:artUrl"].Value().(string)
+			lengthInMillis := songData["mpris:length"].Value().(uint64) / 1000
 			artUrl = strings.ReplaceAll(artUrl, "open.spotify.com", "i.scdn.co")
 
 			songInfo := SongInfo{
@@ -137,6 +146,7 @@ func listenToDbus(channel *amqp.Channel, done chan os.Signal) error {
 			if err != nil {
 				log.Errorln("listenToDbus > channel.Publish:", err)
 			}
+			red.Set(redisKey, infoBytes, time.Duration(lengthInMillis)*time.Millisecond)
 		}
 	}
 }
