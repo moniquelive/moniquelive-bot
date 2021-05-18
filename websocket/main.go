@@ -34,7 +34,6 @@ var upgrader = websocket.Upgrader{
 
 type wsHandler struct {
 	writerChan chan []byte
-	doneChan   chan struct{}
 }
 
 func init() {
@@ -56,14 +55,13 @@ func main() {
 
 	var err error
 	wsChan := make(chan []byte)
-	wsDoneChan := make(chan struct{})
 
 	//
 	// Start websocket server
 	//
 	log.Println("Websocket Listening ...")
 	router := http.NewServeMux()
-	router.Handle("/ws", wsHandler{writerChan: wsChan, doneChan: wsDoneChan})
+	router.Handle("/ws", wsHandler{writerChan: wsChan})
 
 	// start server in a goroutine
 	srv := &http.Server{Addr: ":9090", Handler: router}
@@ -130,12 +128,9 @@ func main() {
 			// will close the deliveries channel
 			err = channel.Cancel(tag, true)
 			check(err)
-			// will close websocket handler
-			close(wsChan)
 
 		// wait for go handle(...)
 		case <-deliveriesDoneChan:
-		case <-wsDoneChan:
 			return
 		}
 	}
@@ -144,6 +139,7 @@ func main() {
 func handle(deliveries <-chan amqp.Delivery, ws chan<- []byte, done chan<- struct{}) {
 	defer func() {
 		log.Println("AMQP Handler: Exiting from deliveries handler")
+		close(ws)
 		done <- struct{}{}
 	}()
 	log.Debugln("Listening...")
@@ -164,7 +160,7 @@ func handle(deliveries <-chan amqp.Delivery, ws chan<- []byte, done chan<- struc
 
 func (ws wsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	const (
-		readWait   = 5 * time.Second     // Time allowed to read the data from the client.
+		writeWait  = 10 * time.Second    // Time allowed to read the data from the client.
 		pongWait   = 60 * time.Second    // Time allowed to read the next pong message from the client.
 		pingPeriod = (pongWait * 9) / 10 // Send pings to client with this period. Must be less than pongWait.
 	)
@@ -172,7 +168,6 @@ func (ws wsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		log.Println("WS Handler: Exiting from wsHandler")
 		pingTicker.Stop()
-		ws.doneChan <- struct{}{}
 	}()
 
 	// Upgrade HTTP connection
@@ -181,23 +176,46 @@ func (ws wsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		log.Errorln("wsHandler: Upgrade error:", err)
 		return
 	}
-	defer func() { _ = conn.Close() }()
+
+	go func() {
+		defer func() {
+			conn.Close()
+			ws.writerChan <- nil
+			log.Infoln("caindo fora do read pump!")
+		}()
+
+		_ = conn.SetReadDeadline(time.Now().Add(pongWait))
+		conn.SetPongHandler(func(string) error { _ = conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
+		_, _, err := conn.ReadMessage()
+		if err != nil {
+			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway) {
+				log.Errorln("error:", err)
+			}
+			log.Debugln("err != nil", err)
+			return
+		}
+	}()
 
 	log.Println("Websocket Conectado!")
 	for {
 		select {
 		case body := <-ws.writerChan:
 			if body == nil {
+				log.Debugln("Body == nil")
 				return
 			}
+			_ = conn.SetWriteDeadline(time.Now().Add(writeWait))
 			err := conn.WriteMessage(websocket.TextMessage, body)
 			if err != nil {
 				log.Errorln("ServeHTTP > writerChan:", err)
 				return
 			}
 		case <-pingTicker.C:
-			_ = conn.SetReadDeadline(time.Now().Add(readWait))
-			_, _, _ = conn.ReadMessage()
+			_ = conn.SetWriteDeadline(time.Now().Add(writeWait))
+			if err := conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+				log.Errorln("pingTicker:", err)
+				return
+			}
 		}
 	}
 }
