@@ -310,14 +310,28 @@
       "help": "Shows Demoscene tutorials url",
       "ajuda": "Mostra a url dos tutoriais de Demoscene",
       "actions": [
-        "!demo",
         "!demos",
+        "!demo",
         "!demoscene",
         "!ds"
       ],
       "responses": [
         "/color YellowGreen",
         "/me https://demoscenetuts.monique.dev/"
+      ]
+    },
+    {
+      "help": "Shows IT beginners tutorials url",
+      "ajuda": "Mostra a url de tutoriais para iniciantes em TI",
+      "actions": [
+        "!iniciantes",
+        "!iniciante",
+        "!init",
+        "!ini"
+      ],
+      "responses": [
+        "/color YellowGreen",
+        "/me https://iniciante.monique.dev/"
       ]
     }
   ]
