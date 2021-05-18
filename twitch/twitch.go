@@ -48,7 +48,7 @@ func NewPlayer() (*Player, error) {
 	redisURL := os.Getenv("REDIS_URL")
 	red = redis.NewClient(&redis.Options{Addr: redisURL})
 	if _, err := red.Ping().Result(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error pinging redis: %w", err)
 	}
 	return &Player{red: red}, nil
 }

@@ -50,4 +50,4 @@ services:
       - rabbitmq_default
       - caching_default
     volumes:
-      - ./commands.json:/commands.json:ro
+      - ./twitch/config:/config:ro

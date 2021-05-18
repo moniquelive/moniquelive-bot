@@ -99,7 +99,7 @@ func (c Commands) Upside(cmdLine string) string {
 }
 
 func (c *Commands) Reload() {
-	file, err := os.Open("commands.json")
+	file, err := os.Open("./config/commands.json")
 	if err != nil {
 		log.Fatalln("erro ao abrir commands.json:", err)
 	}

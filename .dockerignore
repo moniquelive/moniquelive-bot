@@ -1,4 +1,3 @@
 .idea
-**/Dockerfile
-**/docker-compose.sh
-
+Dockerfile
+docker-compose.yml

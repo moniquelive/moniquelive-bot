@@ -47,6 +47,8 @@ func check(err error) {
 func main() {
 	defer log.Debugln("AMQP consumer shutdown.")
 
+	go NewWatcher()
+
 	var err error
 
 	conn, err := amqp.Dial(amqpURL)
@@ -92,8 +94,6 @@ func main() {
 		nil,        // arguments
 	)
 	check(err)
-
-	NewWatcher()
 
 	client, err := NewTwitch(username, oauth, &cmd, channel)
 	if err != nil {

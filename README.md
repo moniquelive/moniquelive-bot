@@ -8,6 +8,8 @@
 
 # Brainstorm
 
+- [ ] websocket: testar 2 clients ao mesmo tempo (ch <- nil vai zoar...)
+- [ ] comando !ragejs com contador
 - [ ] criar client-cli para postar/assinar filas do rabbitmq (Cobra SPF)
 - [ ] extrair microserviço de dbus / spotify
 - [ ] comando !m pode disparar o evento de WS para mostrar a musica no OBS
@@ -63,4 +65,6 @@
   - refatorar parte do bot que envia mensagem, para enfileirar e evitar concorrencia
 - [x] fazer index.js reconectar no websocket quando o bot parar
 - [x] extrair microserviço de tts
-
+- [x] websocket (des)conectando certinho?
+- [x] comando !discord que exibe o telegram...
+- [x] fs watcher não está funcionando
