@@ -8,6 +8,7 @@
 
 # Brainstorm
 
+- [ ] twitch-bot_perola: investigar porque timeout na conexao nao derruba ela
 - [ ] websocket: testar 2 clients ao mesmo tempo (ch <- nil vai zoar...)
 - [ ] comando !ragejs com contador
 - [ ] criar client-cli para postar/assinar filas do rabbitmq (Cobra SPF)

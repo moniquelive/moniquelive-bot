@@ -43,9 +43,11 @@ services:
   twitch:
     image: twitch-bot-twitch
     build: twitch
+    tty: true
     environment:
       - RABBITMQ_URL=amqp://moniquelivebot:moniquelivebot@rabbitmq/twitch?heartbeat=600
       - REDIS_URL=redis:6379
+      - TERM=xterm-256color
     networks:
       - rabbitmq_default
       - caching_default
