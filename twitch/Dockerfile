@@ -1,7 +1,7 @@
 #-----------------------------------------------------------------------------
 FROM golang:alpine AS builder
 
-RUN apk add --no-cache upx git ca-certificates && update-ca-certificates
+RUN apk add --no-cache upx git tzdata ca-certificates && update-ca-certificates
 
 ENV GO111MODULE=on \
   CGO_ENABLED=0 \
@@ -29,7 +29,9 @@ RUN upx --lzma /go/bin/main
 FROM scratch
 
 ENV GODEBUG=madvdontneed=1
+ENV TZ=America/Sao_Paulo
 
+COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /go/bin/main .
 

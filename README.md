@@ -8,7 +8,6 @@
 
 # Brainstorm
 
-- [ ] localizar o horário do log do twitch-bot
 - [ ] twitch-bot_perola: investigar porque timeout na conexao nao derruba ela
 - [ ] websocket: testar 2 clients ao mesmo tempo (ch <- nil vai zoar...)
 - [ ] criar client-cli para postar/assinar filas do rabbitmq (Cobra SPF)
@@ -61,3 +60,4 @@
 - [x] fs watcher não está funcionando
 - [x] colocar notificação de musica no layer
 - [x] comando !ban com sorteio de motivos aleatorios
+- [x] localizar o horário do log do twitch-bot
