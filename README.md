@@ -11,7 +11,6 @@
 - [ ] twitch-bot_perola: investigar porque timeout na conexao nao derruba ela
 - [ ] websocket: testar 2 clients ao mesmo tempo (ch <- nil vai zoar...)
 - [ ] criar client-cli para postar/assinar filas do rabbitmq (Cobra SPF)
-- [ ] extrair microserviço de dbus / spotify
 - [ ] comando !ragejs com contador
 - [ ] comando !m pode disparar o evento de WS para mostrar a musica no OBS
 - [ ] comando !projeto do dia (!today/!hoje)
@@ -61,3 +60,4 @@
 - [x] colocar notificação de musica no layer
 - [x] comando !ban com sorteio de motivos aleatorios
 - [x] localizar o horário do log do twitch-bot
+- [x] extrair microserviço de dbus / spotify

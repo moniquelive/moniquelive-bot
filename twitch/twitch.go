@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"os"
 	"strings"
 	"text/template"
@@ -218,7 +219,11 @@ func (t Twitch) parseTemplate(
 	vars.Player = *t.player
 	vars.Roster = *t.rstr
 
-	tmpl, err := template.New("json").Parse(str)
+	fns := template.FuncMap{
+		"random": func(choices []string) string { return choices[rand.Intn(len(choices))] },
+	}
+
+	tmpl, err := template.New("json").Funcs(fns).Parse(str)
 	if err != nil {
 		return
 	}
