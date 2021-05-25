@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"os"
 	"sort"
 	"strings"
@@ -14,11 +15,13 @@ type Commands struct {
 		Actions   []string `json:"actions"`
 		Responses []string `json:"responses"`
 		Logs      []string `json:"logs"`
+		Extras    []string `json:"extras"`
 		Ajuda     string   `json:"ajuda"`
 		Help      string   `json:"help"`
 	} `json:"commands"`
 	ActionResponses map[string][]string
 	ActionLogs      map[string][]string
+	ActionExtras    map[string][]string
 	SortedActions   []string
 	actionAjuda     map[string]string
 	actionHelp      map[string]string
@@ -98,6 +101,14 @@ func (c Commands) Upside(cmdLine string) string {
 	return result
 }
 
+func (c Commands) Ban(cmdLine string, extras []string) string {
+	if cmdLine == "" {
+		return c.Ajuda("ban")
+	}
+	randomExtra := extras[rand.Intn(len(extras))]
+	return strings.ReplaceAll(randomExtra, "${target}", cmdLine)
+}
+
 func (c *Commands) Reload() {
 	file, err := os.Open("./config/commands.json")
 	if err != nil {
@@ -113,16 +124,19 @@ func (c *Commands) Reload() {
 func (c *Commands) refreshCache() {
 	c.ActionLogs = make(map[string][]string)      // refresh action x logs map
 	c.ActionResponses = make(map[string][]string) // refresh action x responses map
+	c.ActionExtras = make(map[string][]string)    // refresh action x extras map
 	c.SortedActions = nil                         // refresh sorted actions (for !commands)
 	c.actionAjuda = make(map[string]string)       // refresh action x Ajuda texts
 	c.actionHelp = make(map[string]string)        // refresh action x Help texts
 	for _, command := range c.Commands {
 		responses := command.Responses
+		extras := command.Extras
 		logs := command.Logs
 		ajuda := command.Ajuda
 		help := command.Help
 		for _, action := range command.Actions {
 			c.ActionResponses[action] = responses
+			c.ActionExtras[action] = extras
 			c.ActionLogs[action] = logs
 			c.actionAjuda[action] = ajuda
 			c.actionHelp[action] = help

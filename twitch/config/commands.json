@@ -344,6 +344,30 @@
         "/color YellowGreen",
         "/me telegram: https://t.me/joinchat/nq7dy4jqN01kNmVh"
       ]
+    },
+    {
+      "help": "'Bans' a user",
+      "ajuda": "'Expulsa' um amiguinho",
+      "actions": [
+        "!ban",
+        "!kick",
+        "!banir",
+        "!chutar"
+      ],
+      "responses": [
+        "/color YellowGreen",
+        "/me {{ .Command.Ban .CmdLine .Extras }}"
+      ],
+      "extras": [
+        "_rm -rf /home/${target}",
+        "${target} tirou 1 no d20 e foi banid@...",
+        "${target} foi banid@ por curtir javascript",
+        "${target} foi banid@ por perguntar a linguagem preferida da Monique",
+        "${target} foi banid@ por dar commit na main",
+        "${target} foi banid@ por dar DELETE sem WHERE",
+        "${target} foi banid@ por esquecer o ';'",
+        "${target} foi banid@ por ser programador Senior com 2 anos de experiência em React,"
+      ]
     }
   ]
 }
