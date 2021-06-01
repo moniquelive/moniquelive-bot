@@ -124,19 +124,20 @@
       "ajuda": "Redes sociais da Moniquelive",
       "actions": [
         "!social",
+        "!links",
         "!s"
       ],
       "responses": [
         "/color yellowgreen",
-        "/me blog: https://monique.dev",
-        "/me github: https://github.com/moniquelive",
-        "/me linkedin: https://linkedin.com/in/moniquelive",
-        "/me twitter: https://twitter.com/moniquelive",
-        "/me instagram: https://www.instagram.com/moniquelive.dev",
-        "/me youtube: https://www.youtube.com/moniquelive",
-        "/me stackoverflow: https://stackoverflow.com/users/9793/cyber-oliveira",
-        "/me dev.to: https://dev.to/moniquelive",
-        "/me telegram: https://t.me/joinchat/nq7dy4jqN01kNmVh"
+        "/me 📑: https://monique.dev",
+        "/me 💻: https://github.com/moniquelive",
+        "/me 👷: https://linkedin.com/in/moniquelive",
+        "/me 🐦: https://twitter.com/moniquelive",
+        "/me 📸: https://www.instagram.com/moniquelive.dev",
+        "/me 📺: https://www.youtube.com/moniquelive",
+        "/me 🤝: https://stackoverflow.com/users/9793/cyber-oliveira",
+        "/me 📖: https://dev.to/moniquelive",
+        "/me 💌: https://t.me/joinchat/nq7dy4jqN01kNmVh"
       ]
     },
     {
@@ -367,8 +368,21 @@
         "${target} foi banid@ por dar DELETE sem WHERE",
         "${target} foi banid@ por esquecer o ';'",
         "${target} foi banid@ por ser programador Senior com 2 anos de experiência em React",
-        "${target} foi banid@ por que fez chmod 777 no /",
+        "${target} foi banid@ por que fez chmod -R 777 /",
         "${target} foi banid@ por testar em prod"
+      ]
+    },
+    {
+      "help": "The name of the kitty",
+      "ajuda": "Nome da gatinha",
+      "actions": [
+        "!gata",
+        "!cat",
+        "!gato"
+      ],
+      "responses": [
+        "/color YellowGreen",
+        "/me 🐈 Chanel"
       ]
     }
   ]

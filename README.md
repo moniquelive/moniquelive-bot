@@ -8,14 +8,15 @@
 
 # Brainstorm
 
+- [ ] comando !m pode disparar o evento de WS para mostrar a musica no OBS
+  - precisa fazer um refactoring para envio de AMQP ser menos burocratico
+- [ ] comando !ragejs com contador
+- [ ] comando !skip - abrir votação de x segundos para pular musica se maioria concordar
 - [ ] twitch-bot_perola: investigar porque timeout na conexao nao derruba ela
 - [ ] websocket: testar 2 clients ao mesmo tempo (ch <- nil vai zoar...)
 - [ ] criar client-cli para postar/assinar filas do rabbitmq (Cobra SPF)
-- [ ] comando !ragejs com contador
-- [ ] comando !m pode disparar o evento de WS para mostrar a musica no OBS
-- [ ] comando !projeto do dia (!today/!hoje)
-- [ ] comando !skip - abrir votação de x segundos para pular musica se maioria concordar
 - [ ] comando !selfie para tocar video de auto-apresentacao (ola, sou a Monique...)
+- [ ] comando !projeto do dia (!today/!hoje)
 - [ ] (api da twitch) comando !uptime - informa quanto tempo a live está online
 - [ ] (api da twitch) comando !schedule - mostra a agenda da twitch
 - [ ] timers (alonga, hidrata, etc.)
