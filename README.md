@@ -8,6 +8,7 @@
 
 # Brainstorm
 
+- [ ] comando !notas que exibe no html um markdown com notas do dia
 - [ ] comando !m pode disparar o evento de WS para mostrar a musica no OBS
   - precisa fazer um refactoring para envio de AMQP ser menos burocratico
 - [ ] comando !ragejs com contador

@@ -286,6 +286,7 @@
         "!teclado",
         "!keyboard",
         "!keyb",
+        "!kb",
         "!kbd",
         "!teclas"
       ],
@@ -339,6 +340,7 @@
       "help": "Shows our 'discord' url",
       "ajuda": "Exibe nossa url do 'discord'",
       "actions": [
+        "!telegram",
         "!discord"
       ],
       "responses": [
