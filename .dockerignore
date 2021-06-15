@@ -1,3 +1,3 @@
 .idea
-Dockerfile
+**/Dockerfile
 docker-compose.yml
