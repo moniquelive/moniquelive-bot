@@ -40,6 +40,16 @@ services:
     networks:
       - rabbitmq_default
 
+  twitch-stats:
+    image: twitch-bot-twitch_stats
+    build: twitch_stats
+    environment:
+      - RABBITMQ_URL=amqp://moniquelivebot:moniquelivebot@rabbitmq/twitch?heartbeat=600
+      - REDIS_URL=redis:6379
+    networks:
+      - rabbitmq_default
+      - caching_default
+
   twitch:
     image: twitch-bot-twitch
     build: twitch

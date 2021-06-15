@@ -16,10 +16,11 @@ import (
 
 const (
 	//moniqueID = "4930146"
-	channel      = "moniquelive"
-	streamlabsID = "105166207"
-	TtsReward    = "e706421e-01f7-48fd-a4c6-4393d1ba4ec8"
-	redisKey     = "twitch-bot:dbus:song-info"
+	channel                = "moniquelive"
+	streamlabsID           = "105166207"
+	TtsReward              = "e706421e-01f7-48fd-a4c6-4393d1ba4ec8"
+	redisKey               = "twitch-bot:dbus:song-info"
+	twitchMessageTopicName = "twitch_message_delivered"
 )
 
 const (
@@ -95,16 +96,19 @@ func NewTwitch(username, oauth string, cmd *Commands, amqpChannel *amqp.Channel)
 	})
 
 	client.OnUserJoinMessage(func(message irc.UserJoinMessage) {
+		publishTwitchMessage(t.amqpChannel, message.Raw)
 		log.Println(colorGreen, "*** OnUserJoinMessage >>>", message.User, colorReset)
 		t.rstr.AddUser(message.User)
 	})
 
 	client.OnUserPartMessage(func(message irc.UserPartMessage) {
+		publishTwitchMessage(t.amqpChannel, message.Raw)
 		log.Println(colorRed, "*** OnUserPartMessage <<<", message.User, colorReset)
 		t.rstr.RemoveUser(message.User)
 	})
 
 	client.OnNamesMessage(func(message irc.NamesMessage) {
+		publishTwitchMessage(t.amqpChannel, message.Raw)
 		log.Println(colorWhite, "*** OnNamesMessage:", len(message.Users), colorReset)
 		for _, user := range message.Users {
 			t.rstr.AddUser(user)
@@ -112,6 +116,7 @@ func NewTwitch(username, oauth string, cmd *Commands, amqpChannel *amqp.Channel)
 	})
 
 	client.OnPrivateMessage(func(message irc.PrivateMessage) {
+		publishTwitchMessage(t.amqpChannel, message.Raw)
 		if rewardID, ok := message.Tags["custom-reward-id"]; ok && rewardID == TtsReward {
 			err := t.amqpChannel.Publish("amq.topic", createTtsTopicName, false, false, amqp.Publishing{
 				ContentType:     "text/plain",
@@ -189,6 +194,19 @@ func NewTwitch(username, oauth string, cmd *Commands, amqpChannel *amqp.Channel)
 	client.Join(channel)
 
 	return t, nil
+}
+
+func publishTwitchMessage(amqpChannel *amqp.Channel, rawMessage string) {
+	err := amqpChannel.Publish("amq.topic", twitchMessageTopicName, false, false, amqp.Publishing{
+		ContentType:     "text/plain",
+		ContentEncoding: "utf-8",
+		DeliveryMode:    2,
+		Expiration:      "5000",
+		Body:            []byte(rawMessage),
+	})
+	if err != nil {
+		log.Errorln("publishTwitchMessage > amqpChannel.Publish:", err)
+	}
 }
 
 func (t Twitch) Say(msg string) {
