@@ -386,6 +386,18 @@
         "/color YellowGreen",
         "/me 🐈 Chanel"
       ]
+    },
+    {
+      "help": "Themes I use",
+      "ajuda": "Meus temas",
+      "actions": [
+        "!theme",
+        "!tema"
+      ],
+      "responses": [
+        "/color YellowGreen",
+        "/me https://github.com/morhetz/gruvbox || https://github.com/jcornwall/base16-woodland-scheme"
+      ]
     }
   ]
 }
