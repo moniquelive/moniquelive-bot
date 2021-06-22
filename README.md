@@ -22,26 +22,6 @@
 - [ ] (api da twitch) comando !schedule - mostra a agenda da twitch
 - [ ] timers (alonga, hidrata, etc.)
 
-## Twitch Stats (expiração default: 8h)
-
-```json
-{
-  "Usu123": {
-    "firstSeen": "new Date()",
-    "urls": ["url1", "url2", "..."]
-  }
-}
-```
-- OnUserJoin
-  - cria hashtable do usuário com campo de "first seen time"
-- OnUserPart
-  - (nada por enquanto)
-- OnNames
-  - cria hashtable de inexistentes (vide OnUserJoin)
-- OnPrivateMessage
-  - regexp:
-    - adiciona url em lista de urls para usuário
-
 # Pipe dream
 
 - [ ] Mini-game na tela de #BRB

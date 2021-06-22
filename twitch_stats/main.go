@@ -123,23 +123,15 @@ func handle(deliveries <-chan amqp.Delivery, done chan<- struct{}) {
 		//log.Infoln("DELIVERY:", body)
 		switch msg := twitch.ParseMessage(body).(type) {
 		case *twitch.UserJoinMessage:
-			log.Infoln("UserJoin: ", msg.User)
+			parseUserJoin(*msg)
 		case *twitch.UserPartMessage:
-			log.Infoln("UserJoin: ", msg.User)
+			parseUserPart(*msg)
 		case *twitch.NamesMessage:
-			for _, user := range msg.Users {
-				log.Info(user)
-				log.Info(" ")
-			}
-			log.Infoln()
+			parseNames(*msg)
 		case *twitch.PrivateMessage:
-			log.Infof("PvtMessage: %v (%v): %v\n",
-				msg.User.Name,
-				msg.User.ID,
-				msg.Message,
-			)
-		//default:
-		//	log.Debugf("Desconhecido: %T\n", msg)
+			parsePrivate(*msg)
+			//default:
+			//	log.Debugf("Desconhecido: %T\n", msg)
 		}
 		_ = delivery.Ack(false)
 	}
