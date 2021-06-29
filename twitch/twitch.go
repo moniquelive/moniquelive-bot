@@ -9,6 +9,8 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/moniquelive/moniquelive-bot/twitch/commands"
+
 	irc "github.com/gempir/go-twitch-irc/v2"
 	"github.com/go-redis/redis"
 	"github.com/streadway/amqp"
@@ -36,7 +38,7 @@ const (
 
 type Twitch struct {
 	client      *irc.Client
-	cmd         *Commands
+	cmd         *commands.Commands
 	rstr        *Roster
 	amqpChannel *amqp.Channel
 	player      *Player
@@ -74,7 +76,7 @@ func (p Player) CurrentSong() string {
 	return songInfo.Artist + " - " + songInfo.Title + " - " + songInfo.ImgUrl
 }
 
-func NewTwitch(username, oauth string, cmd *Commands, amqpChannel *amqp.Channel) (*Twitch, error) {
+func NewTwitch(username, oauth string, cmd *commands.Commands, amqpChannel *amqp.Channel) (*Twitch, error) {
 	player, err := NewPlayer()
 	if err != nil {
 		return nil, err
@@ -228,7 +230,7 @@ func (t Twitch) parseTemplate(
 		Commands string
 		CmdLine  string
 		Extras   []string
-		Command  Commands
+		Command  commands.Commands
 	}
 	vars.CmdLine = cmdLine
 	vars.Extras = extras

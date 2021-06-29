@@ -6,6 +6,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/moniquelive/moniquelive-bot/twitch/commands"
+
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
@@ -14,7 +16,7 @@ import (
 //go:embed .oauth
 var oauth string
 
-var cmd Commands
+var cmd commands.Commands
 
 const (
 	username           = "moniquelive_bot"

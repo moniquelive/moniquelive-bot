@@ -1,4 +1,4 @@
-package main
+package commands
 
 import (
 	"encoding/json"
@@ -7,6 +7,9 @@ import (
 	"os"
 	"sort"
 	"strings"
+
+	"github.com/go-redis/redis"
+	"github.com/sirupsen/logrus"
 )
 
 type Commands struct {
@@ -27,13 +30,20 @@ type Commands struct {
 	actionHelp      map[string]string
 }
 
+const (
+	redisUrlsKeyPrefix = "twitch-bot:twitch_stats:urls:"
+)
+
 var (
 	//https://en.wikipedia.org/wiki/Transformation_of_text#Upside-down_text
-	lower   = []rune{'\u007A', '\u028E', '\u0078', '\u028D', '\u028C', '\u006E', '\u0287', '\u0073', '\u0279', '\u0062', '\u0064', '\u006F', '\u0075', '\u026F', '\u006C', '\u029E', '\u017F', '\u1D09', '\u0265', '\u0253', '\u025F', '\u01DD', '\u0070', '\u0254', '\u0071', '\u0250'}
-	upper   = []rune{'\u005A', '\u2144', '\u0058', '\u004D', '\u039B', '\u0548', '\uA7B1', '\u0053', '\u1D1A', '\u10E2', '\u0500', '\u004F', '\u004E', '\uA7FD', '\u2142', '\uA4D8', '\u017F', '\u0049', '\u0048', '\u2141', '\u2132', '\u018E', '\u15E1', '\u0186', '\u15FA', '\u2200'}
-	digits  = []rune{'\u0036', '\u0038', '\u3125', '\u0039', '\u100C', '\u07C8', '\u218B', '\u218A', '\u21C2', '\u0030'}
-	punct   = []rune{'\u214B', '\u203E', '\u00BF', '\u00A1', '\u201E', '\u002C', '\u02D9', '\u0027', '\u061B'}
-	charMap = map[rune]rune{}
+	lower    = []rune{'\u007A', '\u028E', '\u0078', '\u028D', '\u028C', '\u006E', '\u0287', '\u0073', '\u0279', '\u0062', '\u0064', '\u006F', '\u0075', '\u026F', '\u006C', '\u029E', '\u017F', '\u1D09', '\u0265', '\u0253', '\u025F', '\u01DD', '\u0070', '\u0254', '\u0071', '\u0250'}
+	upper    = []rune{'\u005A', '\u2144', '\u0058', '\u004D', '\u039B', '\u0548', '\uA7B1', '\u0053', '\u1D1A', '\u10E2', '\u0500', '\u004F', '\u004E', '\uA7FD', '\u2142', '\uA4D8', '\u017F', '\u0049', '\u0048', '\u2141', '\u2132', '\u018E', '\u15E1', '\u0186', '\u15FA', '\u2200'}
+	digits   = []rune{'\u0036', '\u0038', '\u3125', '\u0039', '\u100C', '\u07C8', '\u218B', '\u218A', '\u21C2', '\u0030'}
+	punct    = []rune{'\u214B', '\u203E', '\u00BF', '\u00A1', '\u201E', '\u002C', '\u02D9', '\u0027', '\u061B'}
+	charMap  = map[rune]rune{}
+	log      = logrus.WithField("package", "commands")
+	redisURL = os.Getenv("REDIS_URL")
+	red      *redis.Client
 )
 
 func init() {
@@ -49,6 +59,12 @@ func init() {
 	charMap['}'] = '{'
 	charMap['['] = ']'
 	charMap[']'] = '['
+
+	red = redis.NewClient(&redis.Options{Addr: redisURL})
+	if _, err := red.Ping().Result(); err != nil {
+		log.Println("Commands.init > Sem redis...")
+		red = nil
+	}
 }
 
 func fillMap(from, to rune, slice []rune) {
@@ -107,6 +123,36 @@ func (c Commands) Ban(cmdLine string, extras []string) string {
 	}
 	randomExtra := extras[rand.Intn(len(extras))]
 	return strings.ReplaceAll(randomExtra, "${target}", cmdLine)
+}
+
+func (c Commands) Urls(cmdLine string) string {
+	username := cmdLine
+	if username == "" {
+		username = "*"
+	}
+	allUsersRedisKeys := red.Keys(redisUrlsKeyPrefix + username).Val()
+	if len(allUsersRedisKeys) == 0 {
+		if username == "*" {
+			username = "Ninguém"
+		} else {
+			username += " não"
+		}
+		return username + " compartilhou urls ainda... :("
+	}
+	var response []string
+	for _, redisKey := range allUsersRedisKeys {
+		split := strings.Split(redisKey, ":")
+		username = split[len(split)-1]
+		urls := red.LRange(redisUrlsKeyPrefix+username, 0, -1).Val()
+		if len(urls) > 0 {
+			response = append(response,
+				username+" compartilhou: "+strings.Join(urls, " "))
+		}
+	}
+	if len(response) == 0 {
+		return "Estranhaço... :S"
+	}
+	return strings.Join(response, " - ")
 }
 
 func (c *Commands) Reload() {

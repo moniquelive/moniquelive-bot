@@ -398,6 +398,19 @@
         "/color YellowGreen",
         "/me https://github.com/morhetz/gruvbox || https://github.com/jcornwall/base16-woodland-scheme"
       ]
+    },
+    {
+      "help": "Lists shared urls for a user",
+      "ajuda": "Lista urls compartilhadas por alguém",
+      "actions": [
+        "!urls",
+        "!url",
+        "!u"
+      ],
+      "responses": [
+        "/color YellowGreen",
+        "/me {{ .Command.Urls .CmdLine }}"
+      ]
     }
   ]
 }
