@@ -8,13 +8,13 @@
 
 # Brainstorm
 
-- [ ] comando !notas que exibe no html um markdown com notas do dia
+- [ ] comando !stats que mostra quantas vezes cada comando foi dado
 - [ ] comando !m pode disparar o evento de WS para mostrar a musica no OBS
   - precisa fazer um refactoring para envio de AMQP ser menos burocratico
 - [ ] comando !ragejs com contador
 - [ ] comando !skip - abrir votação de x segundos para pular musica se maioria concordar
 - [ ] twitch-bot_perola: investigar porque timeout na conexao nao derruba ela
-- [ ] websocket: testar 2 clients ao mesmo tempo (ch <- nil vai zoar...)
+- [ ] websocket: testar 2 clients ao mesmo tempo (`ch <- nil` vai zoar...)
 - [ ] criar client-cli para postar/assinar filas do rabbitmq (Cobra SPF)
 - [ ] comando !selfie para tocar video de auto-apresentacao (ola, sou a Monique...)
 - [ ] comando !projeto do dia (!today/!hoje)
@@ -63,3 +63,4 @@
 - [x] comando !ban com sorteio de motivos aleatorios
 - [x] localizar o horário do log do twitch-bot
 - [x] extrair microserviço de dbus / spotify
+- [x] comandos !uptime e !urls
