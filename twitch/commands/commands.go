@@ -6,7 +6,9 @@ import (
 	"math/rand"
 	"os"
 	"sort"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/go-redis/redis"
 	"github.com/sirupsen/logrus"
@@ -31,7 +33,8 @@ type Commands struct {
 }
 
 const (
-	redisUrlsKeyPrefix = "twitch-bot:twitch_stats:urls:"
+	redisUrlsKeyPrefix   = "twitch-bot:twitch_stats:urls:"
+	redisSeenAtKeyPrefix = "twitch-bot:twitch_stats:seen_at:"
 )
 
 var (
@@ -126,7 +129,7 @@ func (c Commands) Ban(cmdLine string, extras []string) string {
 }
 
 func (c Commands) Urls(cmdLine string) string {
-	username := cmdLine
+	username := strings.ToLower(cmdLine)
 	if username == "" {
 		username = "*"
 	}
@@ -153,6 +156,27 @@ func (c Commands) Urls(cmdLine string) string {
 		return "Estranhaço... :S"
 	}
 	return strings.Join(response, " - ")
+}
+
+func (c Commands) Uptime(cmdLine string) string {
+	username := strings.ToLower(cmdLine)
+	if username == "" {
+		return c.Ajuda("uptime")
+	}
+	unixtime := red.Get(redisSeenAtKeyPrefix + username).Val()
+	if len(unixtime) == 0 {
+		return username + " não tem horário de entrada... :("
+	}
+	uptime, err := strconv.ParseInt(unixtime, 10, 64)
+	if err != nil {
+		return "Tem algo de estranho que não está certo..."
+	}
+	t := time.Unix(uptime, 0)
+	m := time.Since(t)
+	return fmt.Sprintf("%s entrou dia %v ou seja, %v atrás",
+		username,
+		t.Format("02/01/2006 as 15:04:05"),
+		m.Truncate(time.Second))
 }
 
 func (c *Commands) Reload() {

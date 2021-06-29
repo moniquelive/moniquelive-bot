@@ -411,6 +411,19 @@
         "/color YellowGreen",
         "/me {{ .Command.Urls .CmdLine }}"
       ]
+    },
+    {
+      "help": "Prints the time a user joined chat",
+      "ajuda": "Mostra a hora que um usuário entrou",
+      "actions": [
+        "!uptime",
+        "!time",
+        "!up"
+      ],
+      "responses": [
+        "/color YellowGreen",
+        "/me {{ .Command.Uptime .CmdLine }}"
+      ]
     }
   ]
 }
