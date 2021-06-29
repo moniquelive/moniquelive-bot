@@ -154,7 +154,8 @@ func NewTwitch(username, oauth string, cmd *commands.Commands, amqpChannel *amqp
 		responses, ok := cmd.ActionResponses[action]
 		if ok {
 			for _, unparsedResponse := range responses {
-				parsedResponse, err := t.parseTemplate(unparsedResponse, cmdLine, extras)
+				parsedResponse, err := t.parseTemplate(
+					message.User.Name, unparsedResponse, cmdLine, extras)
 				if err != nil {
 					// TODO: SE LIVRAR DESTE LIXOOOOOOOOO
 					split := strings.Split(err.Error(), ": ")
@@ -168,7 +169,8 @@ func NewTwitch(username, oauth string, cmd *commands.Commands, amqpChannel *amqp
 			}
 			if logs := cmd.ActionLogs[action]; len(logs) > 0 {
 				for _, unparsedLog := range logs {
-					parsedLog, err := t.parseTemplate(unparsedLog, cmdLine, []string{})
+					parsedLog, err := t.parseTemplate(
+						message.User.Name, unparsedLog, cmdLine, []string{})
 					if err != nil {
 						log.Println("erro de template:", err)
 						return
@@ -220,18 +222,21 @@ func (t Twitch) Connect() error {
 }
 
 func (t Twitch) parseTemplate(
-	str string,
+	senderUsername,
+	str,
 	cmdLine string,
 	extras []string,
 ) (_ string, err error) {
 	var vars struct {
-		Roster   Roster
-		Player   Player
-		Commands string
-		CmdLine  string
-		Extras   []string
-		Command  commands.Commands
+		Roster         Roster
+		Player         Player
+		SenderUsername string
+		Commands       string
+		CmdLine        string
+		Extras         []string
+		Command        commands.Commands
 	}
+	vars.SenderUsername = senderUsername
 	vars.CmdLine = cmdLine
 	vars.Extras = extras
 	vars.Commands = strings.Join(t.cmd.SortedActions, " ")

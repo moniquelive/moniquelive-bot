@@ -422,7 +422,7 @@
       ],
       "responses": [
         "/color YellowGreen",
-        "/me {{ .Command.Uptime .CmdLine }}"
+        "/me {{ .Command.Uptime (or .CmdLine .SenderUsername) }}"
       ]
     }
   ]
