@@ -8,6 +8,7 @@
 
 # Brainstorm
 
+- [ ] limitar comando !urls para no maximo retornar 255 chars...
 - [ ] comando !stats que mostra quantas vezes cada comando foi dado
 - [ ] comando !m pode disparar o evento de WS para mostrar a musica no OBS
   - precisa fazer um refactoring para envio de AMQP ser menos burocratico

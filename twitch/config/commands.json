@@ -229,7 +229,7 @@
       ],
       "responses": [
         "/color YellowGreen",
-        "/me Pop OS v20.10 (https://pop.system76.com/)"
+        "/me Pop OS v21.04 (https://pop.system76.com/)"
       ]
     },
     {
@@ -423,6 +423,19 @@
       "responses": [
         "/color YellowGreen",
         "/me {{ .Command.Uptime (or .CmdLine .SenderUsername) }}"
+      ]
+    },
+    {
+      "help": "Show my .vimrc url",
+      "ajuda": "Mostra a url do .vimrc da Mo",
+      "actions": [
+        "!vimrc",
+        "!vim",
+        "!vi"
+      ],
+      "responses": [
+        "/color YellowGreen",
+        "/me minha ultima configuração do VIM: https://github.com/moniquelive/dotfiles/blob/master/vimrc.symlink"
       ]
     }
   ]
