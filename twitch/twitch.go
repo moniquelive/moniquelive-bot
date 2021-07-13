@@ -165,7 +165,9 @@ func NewTwitch(username, oauth string, cmd *commands.Commands, amqpChannel *amqp
 					t.Say("/me " + errMsg)
 					return
 				}
-				t.Say(parsedResponse)
+				for _, split := range strings.Split(parsedResponse, "\n") {
+					t.Say(split)
+				}
 			}
 			if logs := cmd.ActionLogs[action]; len(logs) > 0 {
 				for _, unparsedLog := range logs {

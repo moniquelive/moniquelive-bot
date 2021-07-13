@@ -128,7 +128,8 @@ func (c Commands) Ban(cmdLine string, extras []string) string {
 	return strings.ReplaceAll(randomExtra, "${target}", cmdLine)
 }
 
-func (c Commands) Urls(cmdLine string) string {
+func (c Commands) Urls(cmdLine string) []string {
+	botList := []string{"acaverna","streamholics"}
 	username := strings.ToLower(cmdLine)
 	if username == "" {
 		username = "*"
@@ -140,12 +141,15 @@ func (c Commands) Urls(cmdLine string) string {
 		} else {
 			username += " não"
 		}
-		return username + " compartilhou urls ainda... :("
+		return []string{username + " compartilhou urls ainda... :("}
 	}
 	var response []string
 	for _, redisKey := range allUsersRedisKeys {
 		split := strings.Split(redisKey, ":")
 		username = split[len(split)-1]
+		if In(username, botList) {
+			continue
+		}
 		urls := red.LRange(redisUrlsKeyPrefix+username, 0, -1).Val()
 		if len(urls) > 0 {
 			response = append(response,
@@ -153,9 +157,9 @@ func (c Commands) Urls(cmdLine string) string {
 		}
 	}
 	if len(response) == 0 {
-		return "Estranhaço... :S"
+		return []string{"Estranhaço... :S"}
 	}
-	return strings.Join(response, " - ")
+	return WordWrap(strings.Join(response, " - "), 500)
 }
 
 func (c Commands) Uptime(cmdLine string) string {

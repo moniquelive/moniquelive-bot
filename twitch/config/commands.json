@@ -403,13 +403,15 @@
       "help": "Lists shared urls for a user",
       "ajuda": "Lista urls compartilhadas por alguém",
       "actions": [
+        "!links",
+        "!link",
         "!urls",
         "!url",
         "!u"
       ],
       "responses": [
         "/color YellowGreen",
-        "/me {{ .Command.Urls .CmdLine }}"
+        "{{range .Command.Urls .CmdLine }}/me {{.}}\n{{end}}"
       ]
     },
     {
