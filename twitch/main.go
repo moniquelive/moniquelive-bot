@@ -3,6 +3,7 @@ package main
 import (
 	_ "embed"
 	"encoding/json"
+	"fmt"
 	"os"
 	"time"
 
@@ -144,9 +145,10 @@ func handle(deliveries <-chan amqp.Delivery, client *Twitch) {
 		log.Infoln("DELIVERY:", message)
 
 		var si struct {
-			ImgUrl string `json:"imgUrl"`
-			Title  string `json:"title"`
-			Artist string `json:"artist"`
+			ImgUrl  string `json:"imgUrl"`
+			SongUrl string `json:"songUrl"`
+			Title   string `json:"title"`
+			Artist  string `json:"artist"`
 		}
 		err := json.Unmarshal(delivery.Body, &si)
 		if err != nil {
@@ -154,6 +156,7 @@ func handle(deliveries <-chan amqp.Delivery, client *Twitch) {
 			continue
 		}
 		client.Say("/color Chocolate")
-		client.Say("/me " + si.Artist + " - " + si.Title + " - " + si.ImgUrl)
+		client.Say(fmt.Sprintf("/me %v - %v - %v - %v",
+			si.Artist, si.Title, si.ImgUrl, si.SongUrl))
 	}
 }

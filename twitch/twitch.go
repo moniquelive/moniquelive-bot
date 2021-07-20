@@ -64,16 +64,18 @@ func (p Player) CurrentSong() string {
 		return "sem músicas no momento..."
 	}
 	var songInfo struct {
-		ImgUrl string `json:"imgUrl"`
-		Title  string `json:"title"`
-		Artist string `json:"artist"`
+		ImgUrl  string `json:"imgUrl"`
+		SongUrl string `json:"songUrl"`
+		Title   string `json:"title"`
+		Artist  string `json:"artist"`
 	}
 	err = json.Unmarshal(infoBytes, &songInfo)
 	if err != nil {
 		log.Errorln("CurrentSong.Unmarshal:", err)
 		return "sem músicas no momento..."
 	}
-	return songInfo.Artist + " - " + songInfo.Title + " - " + songInfo.ImgUrl
+	return fmt.Sprintf("%v - %v - %v - %v",
+		songInfo.Artist, songInfo.Title, songInfo.ImgUrl, songInfo.SongUrl)
 }
 
 func NewTwitch(username, oauth string, cmd *commands.Commands, amqpChannel *amqp.Channel) (*Twitch, error) {

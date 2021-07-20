@@ -17,7 +17,7 @@ import (
 
 const (
 	topicName = "spotify_music_updated"
-	redisKey = "twitch-bot:dbus:song-info"
+	redisKey  = "twitch-bot:dbus:song-info"
 )
 
 var (
@@ -28,9 +28,10 @@ var (
 )
 
 type SongInfo struct {
-	ImgUrl string `json:"imgUrl"`
-	Title  string `json:"title"`
-	Artist string `json:"artist"`
+	ImgUrl  string `json:"imgUrl"`
+	SongUrl string `json:"songUrl"`
+	Title   string `json:"title"`
+	Artist  string `json:"artist"`
 }
 
 func init() {
@@ -123,13 +124,15 @@ func listenToDbus(channel *amqp.Channel, done chan os.Signal) error {
 			artist := songData["xesam:artist"].Value().([]string)[0]
 			title := songData["xesam:title"].Value().(string)
 			artUrl := songData["mpris:artUrl"].Value().(string)
+			songUrl := songData["xesam:url"].Value().(string)
 			lengthInMillis := songData["mpris:length"].Value().(uint64) / 1000
 			artUrl = strings.ReplaceAll(artUrl, "open.spotify.com", "i.scdn.co")
 
 			songInfo := SongInfo{
-				ImgUrl: artUrl,
-				Title:  title,
-				Artist: artist,
+				ImgUrl:  artUrl,
+				SongUrl: songUrl,
+				Title:   title,
+				Artist:  artist,
 			}
 			//log.Debugln(songInfo)
 			infoBytes, err := json.Marshal(songInfo)
