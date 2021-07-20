@@ -247,8 +247,8 @@
         "/color YellowGreen", "/me [Teclado] https://ergodox-ez.com/",
         "/color SpringGreen", "/me [Mouse] Logitech MX Master 3",
         "/color YellowGreen", "/me [Monitores] Dell UP3216Q && LG HDR 4K",
-        "/color SpringGreen", "/me [Câmera] Logitech Brio 4K",
-        "/color YellowGreen", "/me [Microfone] Shure Inc. MV5",
+        "/color SpringGreen", "/me [Câmera] GoPro Hero 9 && Logitech Brio 4K",
+        "/color YellowGreen", "/me [Microfone] Shure Inc. MV7",
         "/color SpringGreen", "/me [iPad] as vezes para escrevinhar na tela..."
       ]
     },
@@ -365,6 +365,7 @@
         "_rm -rf /home/${target}",
         "${target} tirou 1 no d20 e foi banid@...",
         "${target} foi banid@ por curtir javascript",
+        "${target} foi banid@ por indicar live de javascript",
         "${target} foi banid@ por perguntar a linguagem preferida da Monique",
         "${target} foi banid@ por dar commit na main",
         "${target} foi banid@ por dar DELETE sem WHERE",
@@ -438,6 +439,19 @@
       "responses": [
         "/color YellowGreen",
         "/me minha ultima configuração do VIM: https://github.com/moniquelive/dotfiles/blob/master/vimrc.symlink"
+      ]
+    },
+    {
+      "help": "Show my tipping url",
+      "ajuda": "Mostra a url de gorjetas",
+      "actions": [
+        "!tips",
+        "!tip",
+        "!pinga"
+      ],
+      "responses": [
+        "/color YellowGreen",
+        "/me pinga ni mim: https://streamlabs.com/moniquelive/tip"
       ]
     }
   ]
