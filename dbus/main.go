@@ -11,13 +11,16 @@ import (
 
 	"github.com/go-redis/redis"
 	"github.com/godbus/dbus/v5"
+	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
 )
 
 const (
-	topicName = "spotify_music_updated"
-	redisKey  = "twitch-bot:dbus:song-info"
+	musicUpdatedTopicName = "spotify_music_updated"
+	skipMusicTopicName    = "spotify_music_skip"
+	redisKey              = "twitch-bot:dbus:song-info"
+	queueName             = "ms.dbus"
 )
 
 var (
@@ -60,24 +63,75 @@ func main() {
 	defer conn.Close()
 	go func() { log.Debugf("closing: %s", <-conn.NotifyClose(make(chan *amqp.Error))) }()
 
-	log.Debugln("got Connection, getting Channel")
-	channel, err := conn.Channel()
-	check(err)
-	defer channel.Close()
+	dbusDoneChan := make(chan struct{})
+	mqDoneChan := make(chan struct{})
 
-	stopChan := make(chan os.Signal, 1)
-	go func() {
-		err := listenToDbus(channel, stopChan)
+	{
+		log.Debugln("getting sending Channel")
+		sendingMQChannel, err := conn.Channel()
 		check(err)
-	}()
+		defer sendingMQChannel.Close()
 
-	// wait for interrupt signal
-	signal.Notify(stopChan, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
-	<-stopChan
+		go func() {
+			err := listenToDbus(sendingMQChannel, dbusDoneChan)
+			check(err)
+		}()
+	}
+
+	{
+		log.Debugln("getting receiving Channel")
+		channel, err := conn.Channel()
+		check(err)
+		defer channel.Close()
+
+		log.Debugf("declaring Queue %q", queueName)
+		queue, err := channel.QueueDeclare(
+			queueName, // name of the queue
+			true,      // durable
+			false,     // delete when unused
+			false,     // exclusive
+			false,     // noWait
+			nil,       // arguments
+		)
+		check(err)
+
+		log.Debugf("binding Queue %q to amq.topic", queueName)
+		err = channel.QueueBind(queueName, skipMusicTopicName, "amq.topic", false, nil)
+		check(err)
+
+		log.Debugln("Setting QoS")
+		err = channel.Qos(1, 0, true)
+		check(err)
+
+		log.Debugf("declared Queue (%q %d messages, %d consumers)", queue.Name, queue.Messages, queue.Consumers)
+
+		tag := uuid.NewString()
+		log.Debugf("starting Consume (tag:%q)", tag)
+		deliveries, err := channel.Consume(
+			queue.Name, // name
+			tag,        // consumerTag,
+			false,      // noAck
+			false,      // exclusive
+			false,      // noLocal
+			false,      // noWait
+			nil,        // arguments
+		)
+		check(err)
+
+		go handle(deliveries, mqDoneChan)
+	}
+
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+	<-signalChan
+
+	dbusDoneChan <- struct{}{}
+	mqDoneChan <- struct{}{}
+
 	log.Debugln("AMQP consumer shutdown.")
 }
 
-func listenToDbus(channel *amqp.Channel, done chan os.Signal) error {
+func listenToDbus(channel *amqp.Channel, done <-chan struct{}) error {
 	conn, err := dbus.ConnectSessionBus()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Failed to connect to session bus:", err)
@@ -98,12 +152,12 @@ func listenToDbus(channel *amqp.Channel, done chan os.Signal) error {
 	conn.Signal(dbusChan)
 	prevTrackID := ""
 
-	log.Debugln("Listening...")
+	log.Debugln("DBus Listening...")
 	// prevTrackIDTime := time.Now()
 	for {
 		select {
 		case <-done:
-			//log.Infoln("CAINDO FUERAAAAA!!!")
+			//log.Debugln("DBUS CAINDO FUERAAAAA!!!")
 			return nil
 		case v := <-dbusChan:
 			data := v.Body[1].(map[string]dbus.Variant)
@@ -139,7 +193,7 @@ func listenToDbus(channel *amqp.Channel, done chan os.Signal) error {
 			if err != nil {
 				log.Errorln("listenToDbus > jsonMarshal:", err)
 			}
-			err = channel.Publish("amq.topic", topicName, false, false, amqp.Publishing{
+			err = channel.Publish("amq.topic", musicUpdatedTopicName, false, false, amqp.Publishing{
 				ContentType:     "application/json",
 				ContentEncoding: "utf-8",
 				DeliveryMode:    2,
@@ -150,6 +204,41 @@ func listenToDbus(channel *amqp.Channel, done chan os.Signal) error {
 				log.Errorln("listenToDbus > channel.Publish:", err)
 			}
 			red.Set(redisKey, infoBytes, time.Duration(lengthInMillis)*time.Millisecond)
+		}
+	}
+}
+
+func handle(deliveries <-chan amqp.Delivery, done <-chan struct{}) {
+	defer log.Println("AMQP Handler: Exiting from deliveries handler")
+
+	dbusConn, err := dbus.ConnectSessionBus()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Failed to connect to session bus:", err)
+		return
+	}
+	defer dbusConn.Close()
+
+	const spotify = "org.mpris.MediaPlayer2.spotify"
+
+	log.Debugln("MQ Listening...")
+	for {
+		select {
+		case <-done:
+			//log.Debugln("MQ CAINDO FUERAAAAA!!!")
+			return
+		case delivery := <-deliveries:
+			if delivery.Body != nil && len(delivery.Body) > 0 {
+				log.Infoln("SkipMusic Body (??):", string(delivery.Body))
+			}
+
+			switch delivery.RoutingKey {
+			case skipMusicTopicName:
+				dbusConn.
+				Object(spotify, "/org/mpris/MediaPlayer2").
+				Call("org.mpris.MediaPlayer2.Player.Next", 0)
+			}
+
+			_ = delivery.Ack(false)
 		}
 	}
 }
