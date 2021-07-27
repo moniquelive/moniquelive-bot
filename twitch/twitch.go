@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"math/rand"
 	"os"
@@ -63,13 +62,8 @@ func (p Player) CurrentSong() string {
 		log.Errorln("CurrentSong.Get:", err)
 		return "sem músicas no momento..."
 	}
-	var songInfo struct {
-		ImgUrl  string `json:"imgUrl"`
-		SongUrl string `json:"songUrl"`
-		Title   string `json:"title"`
-		Artist  string `json:"artist"`
-	}
-	err = json.Unmarshal(infoBytes, &songInfo)
+	var songInfo songInfo
+	err = parseSongInfo(infoBytes, &songInfo)
 	if err != nil {
 		log.Errorln("CurrentSong.Unmarshal:", err)
 		return "sem músicas no momento..."

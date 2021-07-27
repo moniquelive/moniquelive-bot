@@ -2,7 +2,6 @@ package main
 
 import (
 	_ "embed"
-	"encoding/json"
 	"fmt"
 	"os"
 	"time"
@@ -137,26 +136,20 @@ func handle(deliveries <-chan amqp.Delivery, client *Twitch) {
 		}
 		_ = delivery.Ack(false)
 
-		message := string(delivery.Body)
-		if message == "" {
+		if len(delivery.Body) == 0 {
 			log.Debugln("empty message. ignoring...")
 			continue
 		}
-		log.Infoln("DELIVERY:", message)
+		log.Infoln("DELIVERY:", string(delivery.Body))
 
-		var si struct {
-			ImgUrl  string `json:"imgUrl"`
-			SongUrl string `json:"songUrl"`
-			Title   string `json:"title"`
-			Artist  string `json:"artist"`
-		}
-		err := json.Unmarshal(delivery.Body, &si)
+		var songInfo songInfo
+		err := parseSongInfo(delivery.Body, &songInfo)
 		if err != nil {
 			log.Errorln("handle > json.Unmarshal:", err)
 			continue
 		}
 		client.Say("/color Chocolate")
 		client.Say(fmt.Sprintf("/me %v - %v - %v - %v",
-			si.Artist, si.Title, si.ImgUrl, si.SongUrl))
+			songInfo.Artist, songInfo.Title, songInfo.ImgUrl, songInfo.SongUrl))
 	}
 }
