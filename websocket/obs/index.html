@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>OBS Notifier</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne+Mono&display=swap" rel="stylesheet">
+  <script src="elm.min.js"></script>
+  <style>
+      .palette-1 {
+          color: #ECD078;
+      }
+
+      .palette-2 {
+          color: #D95B43;
+      }
+
+      .palette-3 {
+          color: #C02942;
+      }
+
+      .palette-4 {
+          color: #542437;
+      }
+
+      .palette-5 {
+          color: #53777A;
+      }
+
+      @keyframes in-out {
+          0% {
+              transform: translateX(calc(100% + 16px))
+          }
+          25% {
+              transform: translateX(0%)
+          }
+          75% {
+              transform: translateX(0%)
+          }
+          100% {
+              transform: translateX(calc(100% + 16px))
+          }
+      }
+
+      * {
+          margin: 0;
+          padding: 0
+      }
+
+      body {
+          display: flex;
+          align-items: flex-end;
+          justify-content: flex-end;
+
+          font-family: 'Syne Mono', monospace;
+          height: 100vh;
+          overflow: hidden;
+      }
+
+      .main {
+          display: flex;
+
+          color: #ECD078;
+          background-color: #542437;
+          border-radius: 5px;
+
+          padding: 16px;
+          margin-right: 16px;
+          margin-bottom: 16px;
+
+          transform: translateX(calc(100% + 16px));
+      }
+
+      .container {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+
+          margin-left: 16px;
+      }
+
+      .title {
+          font-weight: bold;
+      }
+
+      #coverImg {
+          width: 64px;
+          height: 64px;
+      }
+
+      .animate {
+          animation: in-out 10s;
+      }
+
+      marquee {
+          color: #ff69b4;
+          font-size: 64px;
+      }
+  </style>
+</head>
+<body>
+    <div id="app"></div>
+</body>
+<script>
+    let openedSocket = false
+    const wsPath = '/ws'
+    const wsServerAddr = document.location.origin.replace('http', 'ws')
+
+    const app = Elm.Main.init({
+        node: document.getElementById('app')
+    })
+    app.ports.playUrl.subscribe(function(url) {
+        (new Audio(url)).play()
+    })
+
+    function connect() {
+        if (openedSocket) return
+
+        const socket = new WebSocket(wsServerAddr + wsPath)
+        socket.addEventListener("message", (event) => app.ports.messageReceiver.send(event.data))
+
+        return new Promise((resolve, reject) => {
+            socket.onopen = () => {
+                openedSocket = true
+                resolve(openedSocket)
+            }
+            socket.onclose = (err) => {
+                openedSocket = false
+                reject(err)
+            }
+            socket.onerror = (err) => {
+                openedSocket = false
+                reject(err)
+            }
+        })
+    }
+
+    async function reconnect() {
+        try {
+            await connect()
+        } catch (err) {
+            console.log("WEBSOCKET_RECONNECT: ", err)
+        }
+    }
+
+    reconnect()
+    setInterval(reconnect, 5000)
+</script>
+</html>

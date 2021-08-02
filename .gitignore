@@ -2,3 +2,5 @@
 vox_client_*
 
 .idea
+elm-stuff
+*.min.js

@@ -5,6 +5,8 @@ networks:
     external: true
   rabbitmq_default:
     external: true
+  traefik_default:
+    external: true
 
 services:
   dbus:
@@ -27,10 +29,16 @@ services:
     build: websocket
     environment:
       - RABBITMQ_URL=amqp://moniquelivebot:moniquelivebot@rabbitmq/twitch?heartbeat=600
-    ports:
-      - 9090:9090
+    # ports:
+    #   - 9090:9090
     networks:
       - rabbitmq_default
+      - traefik_default
+    deploy:
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.websocket.rule=Host(`ws.bot.docker.local`)
+        - traefik.http.services.bot-websocket.loadbalancer.server.port=9090
 
   perola:
     image: twitch-bot-perola

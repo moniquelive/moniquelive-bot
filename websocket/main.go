@@ -1,6 +1,7 @@
 package main
 
 import (
+	"embed"
 	"net/http"
 	"os"
 	"os/signal"
@@ -32,6 +33,9 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
+//go:embed obs
+var obsNotifier embed.FS
+
 type wsHandler struct {
 	writerChan chan []byte
 }
@@ -62,6 +66,7 @@ func main() {
 	log.Println("Websocket Listening ...")
 	router := http.NewServeMux()
 	router.Handle("/ws", wsHandler{writerChan: wsChan})
+	router.Handle("/obs/", http.FileServer(http.FS(obsNotifier)))
 
 	// start server in a goroutine
 	srv := &http.Server{Addr: ":9090", Handler: router}
