@@ -37,6 +37,12 @@ port messageReceiver : (String -> msg) -> Sub msg
 -- MODEL
 
 
+type alias WebsocketMessage =
+    { action : String
+    , payload : String
+    }
+
+
 type alias SongInfo =
     { cover : String
     , title : String
@@ -72,24 +78,23 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Recv message ->
-            let
-                quoted =
-                    if String.startsWith "http" message then
-                        "\"" ++ message ++ "\""
-
-                    else
-                        message
-            in
-            case D.decodeString songInfoDecoder quoted of
+            case D.decodeString websocketMessageDecoder message of
                 Ok ws ->
-                    case ws of
-                        AudioUrl url ->
-                            ( model, playUrl url )
-
-                        SI song ->
-                            ( { model | currentSong = song, isAnimating = True }
-                            , Process.sleep 15000 |> Task.perform (always StopAnimation)
-                            )
+                    case ws.action of
+                        "spotify_music_updated" ->
+                            case D.decodeString songInfoDecoder ws.payload of
+                                Ok song ->
+                                    ( { model | currentSong = song, isAnimating = True }
+                                    , Process.sleep 15000 |> Task.perform (always StopAnimation)
+                                    )
+                                Err _ ->
+                                    ( model, Cmd.none )
+                        "tts_created" ->
+                            ( model, playUrl ws.payload )
+                        "marquee_updated" ->
+                            ( model, Cmd.none )
+                        _ ->
+                            ( model, Cmd.none )
 
                 Err _ ->
                     ( model, Cmd.none )
@@ -138,18 +143,16 @@ view model =
 -- JSON decode
 
 
-type WebsocketMessage
-    = SI SongInfo
-    | AudioUrl String
+websocketMessageDecoder : D.Decoder WebsocketMessage
+websocketMessageDecoder =
+    D.map2 WebsocketMessage
+        (D.field "action" D.string)
+        (D.field "payload" D.string)
 
 
-songInfoDecoder : D.Decoder WebsocketMessage
+songInfoDecoder : D.Decoder SongInfo
 songInfoDecoder =
-    D.oneOf
-        [ D.map SI <|
-            D.map3 SongInfo
-                (D.field "imgUrl" D.string)
-                (D.field "title" D.string)
-                (D.field "artist" D.string)
-        , D.map AudioUrl D.string
-        ]
+    D.map3 SongInfo
+        (D.field "imgUrl" D.string)
+        (D.field "title" D.string)
+        (D.field "artist" D.string)

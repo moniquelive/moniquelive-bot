@@ -2,6 +2,7 @@ package main
 
 import (
 	"embed"
+	"encoding/json"
 	"net/http"
 	"os"
 	"os/signal"
@@ -15,9 +16,10 @@ import (
 )
 
 const (
-	queueName           = "ms.websocket"
-	spotifyTopicName    = "spotify_music_updated"
-	ttsCreatedTopicName = "tts_created"
+	queueName               = "ms.websocket"
+	spotifyTopicName        = "spotify_music_updated"
+	ttsCreatedTopicName     = "tts_created"
+	marqueeUpdatedTopicName = "marquee_updated"
 )
 
 var (
@@ -100,6 +102,7 @@ func main() {
 	log.Debugf("binding Queue %q to amq.topic", queueName)
 	err = channel.QueueBind(queueName, spotifyTopicName, "amq.topic", false, nil)
 	err = channel.QueueBind(queueName, ttsCreatedTopicName, "amq.topic", false, nil)
+	err = channel.QueueBind(queueName, marqueeUpdatedTopicName, "amq.topic", false, nil)
 	check(err)
 
 	log.Debugln("Setting QoS")
@@ -149,17 +152,24 @@ func handle(deliveries <-chan amqp.Delivery, ws chan<- []byte, done chan<- struc
 	}()
 	log.Debugln("Listening...")
 	for delivery := range deliveries {
-		if delivery.Body == nil {
+		body := delivery.Body
+		if body == nil {
 			return
 		}
-		message := string(delivery.Body)
-		_ = delivery.Ack(false)
-		if message == "" {
-			log.Debugln("empty message. ignoring...")
-			continue
+		js := struct {
+			Action  string `json:"action"`
+			Payload string `json:"payload"`
+		}{
+			Action:  delivery.RoutingKey,
+			Payload: string(body),
 		}
-		log.Infoln("DELIVERY:", message)
-		ws <- delivery.Body
+		enc, err := json.Marshal(js)
+		if err != nil {
+			log.Errorln("websocket > handle > Marshal:", err)
+		}
+		_ = delivery.Ack(false)
+		log.Infoln("DELIVERY:", string(enc))
+		ws <- enc
 	}
 }
 

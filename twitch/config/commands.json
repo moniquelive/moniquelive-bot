@@ -453,6 +453,18 @@
         "/color YellowGreen",
         "/me pinga ni mim: https://streamlabs.com/moniquelive/tip"
       ]
+    },
+    {
+      "help": "Updates the marquee",
+      "ajuda": "Atualiza a mensagem rotativa",
+      "actions": [
+        "!marquee",
+        "!marq"
+      ],
+      "responses": [
+        "/color YellowGreen",
+        "/me {{ .Command.Marquee .CmdLine }}"
+      ]
     }
   ]
 }

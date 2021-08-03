@@ -12,6 +12,7 @@ import (
 
 	"github.com/go-redis/redis"
 	"github.com/sirupsen/logrus"
+	"github.com/streadway/amqp"
 )
 
 type Commands struct {
@@ -129,7 +130,7 @@ func (c Commands) Ban(cmdLine string, extras []string) string {
 }
 
 func (c Commands) Urls(cmdLine string) []string {
-	botList := []string{"acaverna","streamholics"}
+	botList := []string{"acaverna", "streamholics"}
 	username := strings.ToLower(cmdLine)
 	if username == "" {
 		username = "*"
@@ -181,6 +182,35 @@ func (c Commands) Uptime(cmdLine string) string {
 		username,
 		t.Format("02/01/2006 as 15:04:05"),
 		m.Truncate(time.Second))
+}
+
+func (c Commands) Marquee(cmdLine string) string {
+	amqpURL := os.Getenv("RABBITMQ_URL")
+	conn, err := amqp.Dial(amqpURL)
+	if err != nil {
+		log.Errorln("Marquee > amqp.Dial:", err)
+		return ""
+	}
+	defer conn.Close()
+	go func() { <-conn.NotifyClose(make(chan *amqp.Error)) }()
+	channel, err := conn.Channel()
+	if err != nil {
+		log.Errorln("Marquee > conn.Channel:", err)
+		return ""
+	}
+	defer channel.Close()
+	err = channel.Publish("amq.topic", "marquee_updated", false, false, amqp.Publishing{
+		ContentType:     "application/json",
+		ContentEncoding: "utf-8",
+		DeliveryMode:    2,
+		Expiration:      "60000",
+		Body:            []byte(cmdLine),
+	})
+	if err != nil {
+		log.Errorln("Marquee > channel.Publish:", err)
+		return ""
+	}
+	return "Atualizando marquee: " + cmdLine
 }
 
 func (c *Commands) Reload() {

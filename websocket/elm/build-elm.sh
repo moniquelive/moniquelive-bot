@@ -3,10 +3,10 @@
 set -e
 
 js="elm.js"
-min="../obs-notifier/elm.min.js"
+min="../obs/elm.min.js"
 
 cleanup() {
-  rm $js
+  rm -f $js
 }
 trap cleanup EXIT
 
