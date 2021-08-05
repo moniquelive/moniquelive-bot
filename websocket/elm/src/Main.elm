@@ -51,17 +51,21 @@ type alias SongInfo =
 
 
 type alias Model =
-    { isAnimating : Bool
+    { isBannerMoving : Bool
     , currentSong : SongInfo
+    , marqueeMessage : String
+    , isMarqueeVisible : Bool
     }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( { isAnimating = False
+    ( { isBannerMoving = False
       , currentSong = SongInfo "" "" ""
+      , marqueeMessage = ""
+      , isMarqueeVisible = False
       }
-    , Cmd.none
+    , Process.sleep 30000 |> Task.perform (always MarqueeTick)
     )
 
 
@@ -71,12 +75,19 @@ init _ =
 
 type Msg
     = Recv String
-    | StopAnimation
+    | StopBanner
+    | MarqueeTick
+    | StopMarquee
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        MarqueeTick ->
+            ( { model | isMarqueeVisible = True }
+            , Process.sleep 20000 |> Task.perform (always StopMarquee)
+            )
+
         Recv message ->
             case D.decodeString websocketMessageDecoder message of
                 Ok ws ->
@@ -84,24 +95,33 @@ update msg model =
                         "spotify_music_updated" ->
                             case D.decodeString songInfoDecoder ws.payload of
                                 Ok song ->
-                                    ( { model | currentSong = song, isAnimating = True }
-                                    , Process.sleep 15000 |> Task.perform (always StopAnimation)
+                                    ( { model | currentSong = song, isBannerMoving = True }
+                                    , Process.sleep 15000 |> Task.perform (always StopBanner)
                                     )
+
                                 Err _ ->
                                     ( model, Cmd.none )
+
                         "tts_created" ->
                             ( model, playUrl ws.payload )
+
                         "marquee_updated" ->
-                            ( model, Cmd.none )
+                            ( { model | marqueeMessage = ws.payload }, Cmd.none )
+
                         _ ->
                             ( model, Cmd.none )
 
                 Err _ ->
                     ( model, Cmd.none )
 
-        StopAnimation ->
-            ( { model | isAnimating = False }
+        StopBanner ->
+            ( { model | isBannerMoving = False }
             , Cmd.none
+            )
+
+        StopMarquee ->
+            ( { model | isMarqueeVisible = False }
+            , Process.sleep 30000 |> Task.perform (always MarqueeTick)
             )
 
 
@@ -130,13 +150,20 @@ songInfoView song =
 
 view : Model -> Html Msg
 view model =
-    div
-        [ classList
-            [ ( "main", True )
-            , ( "animate", model.isAnimating )
+    div [ id "root" ]
+        [ div
+            [ classList
+                [ ( "main", True )
+                , ( "animate", model.isBannerMoving )
+                ]
             ]
+            (songInfoView model.currentSong)
+        , node "marquee"
+            [ attribute "scrolldelay" "60"
+            , classList [ ( "animate-marquee", model.isMarqueeVisible ) ]
+            ]
+            [ text model.marqueeMessage ]
         ]
-        (songInfoView model.currentSong)
 
 
 
