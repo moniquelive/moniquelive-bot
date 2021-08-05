@@ -85,7 +85,7 @@ update msg model =
     case msg of
         MarqueeTick ->
             ( { model | isMarqueeVisible = True }
-            , Process.sleep 20000 |> Task.perform (always StopMarquee)
+            , Process.sleep 65000 |> Task.perform (always StopMarquee)
             )
 
         Recv message ->
