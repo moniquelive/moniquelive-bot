@@ -465,6 +465,28 @@
         "/color YellowGreen",
         "/me {{ .Command.Marquee .CmdLine }}"
       ]
+    },
+    {
+      "help": "OO video",
+      "ajuda": "Vídeo sobre OO",
+      "actions": [
+        "!oo"
+      ],
+      "responses": [
+        "/color yellowgreen",
+        "/me vídeo que vai mudar a sua vida: https://www.youtube.com/watch?v=6JBBJQS6nX4&list=PLyR9xTdgYCd9n4V5EK86aEqMd59QZeDD9&index=130&t=2s"
+      ]
+    },
+    {
+      "help": "VIM video",
+      "ajuda": "Vídeo sobre VIM",
+      "actions": [
+        "!vv"
+      ],
+      "responses": [
+        "/color yellowgreen",
+        "/me vídeo sobre VIM, Rails, nnn, etc: https://www.youtube.com/watch?v=uwf6Cu4mQco&list=PLyR9xTdgYCd9n4V5EK86aEqMd59QZeDD9&index=140&t=3451s"
+      ]
     }
   ]
 }
