@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	//moniqueID = "4930146"
+	moniqueID              = "4930146"
 	channel                = "moniquelive"
 	streamlabsID           = "105166207"
 	TtsReward              = "e706421e-01f7-48fd-a4c6-4393d1ba4ec8"
@@ -136,6 +136,11 @@ func NewTwitch(username, oauth string, cmd *commands.Commands, amqpChannel *amqp
 		if message.User.ID == streamlabsID {
 			return
 		}
+		if message.User.ID != moniqueID && strings.HasPrefix(message.Message, "!marq") {
+			t.Say("/color firebrick")
+			t.Say("Desculpa ai " + message.User.DisplayName + ", esse é só da Mo!")
+			return
+		}
 		// cai fora rápido se não for comando que começa com '!'
 		if message.Message == "!" || message.Message[0] != '!' {
 			return
@@ -147,8 +152,7 @@ func NewTwitch(username, oauth string, cmd *commands.Commands, amqpChannel *amqp
 			cmdLine = strings.Join(split[1:], " ")
 		}
 		extras, _ := cmd.ActionExtras[action]
-		responses, ok := cmd.ActionResponses[action]
-		if ok {
+		if responses, ok := cmd.ActionResponses[action]; ok {
 			for _, unparsedResponse := range responses {
 				parsedResponse, err := t.parseTemplate(
 					message.User.Name, unparsedResponse, cmdLine, extras)
