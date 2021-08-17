@@ -241,7 +241,7 @@ func (t Twitch) parseTemplate(
 	vars.SenderUsername = senderUsername
 	vars.CmdLine = cmdLine
 	vars.Extras = extras
-	vars.Commands = strings.Join(t.cmd.SortedActions, " ")
+	vars.Commands = t.cmd.Actions()
 	vars.Command = *t.cmd
 	vars.Player = *t.player
 	vars.Roster = *t.rstr

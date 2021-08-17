@@ -15,6 +15,7 @@ const (
 	userRosterSet         = "twitch-bot:twitch_stats:user_roster"
 	userDataKeySeenAt     = "twitch-bot:twitch_stats:seen_at:"
 	userDataKeyURLs       = "twitch-bot:twitch_stats:urls:"
+	userDataKeyCommands   = "twitch-bot:twitch_stats:command:"
 )
 
 var (
@@ -53,10 +54,26 @@ func parseNames(msg twitch.NamesMessage) {
 }
 
 func parsePrivate(msg twitch.PrivateMessage) {
+	log.Infof("PvtMessage: %v (%v): %v\n", msg.User.Name, msg.User.ID, msg.Message)
+
+	parseHttps(msg)
+	parseCommandsCounter(msg)
+}
+
+func parseCommandsCounter(msg twitch.PrivateMessage) {
+	if !strings.HasPrefix(msg.Message, "!") {
+		return
+	}
+	// !ola que tal -> split -> ["!ola", "que", "tal"] -> [0] -> !ola -> [1:] -> ola
+	command := strings.Split(msg.Message, " ")[0][1:]
+	red.Incr(userDataKeyCommands + command)
+	setDefaultExpiration(userDataKeyCommands + command)
+}
+
+func parseHttps(msg twitch.PrivateMessage) {
 	// regexp:
 	//  adiciona url em lista de urls para usuário
 	//  conta quantas vezes demos cada comando...
-	log.Infof("PvtMessage: %v (%v): %v\n", msg.User.Name, msg.User.ID, msg.Message)
 	re := regexp.MustCompile(`^https?://`)
 	var urls []string
 	for _, s := range strings.Split(msg.Message, " ") {

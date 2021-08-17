@@ -28,14 +28,14 @@ type Commands struct {
 	ActionResponses map[string][]string
 	ActionLogs      map[string][]string
 	ActionExtras    map[string][]string
-	SortedActions   []string
 	actionAjuda     map[string]string
 	actionHelp      map[string]string
 }
 
 const (
-	redisUrlsKeyPrefix   = "twitch-bot:twitch_stats:urls:"
-	redisSeenAtKeyPrefix = "twitch-bot:twitch_stats:seen_at:"
+	redisUrlsKeyPrefix     = "twitch-bot:twitch_stats:urls:"
+	redisSeenAtKeyPrefix   = "twitch-bot:twitch_stats:seen_at:"
+	redisKeyCommandsPrefix = "twitch-bot:twitch_stats:command:"
 )
 
 var (
@@ -229,7 +229,6 @@ func (c *Commands) refreshCache() {
 	c.ActionLogs = make(map[string][]string)      // refresh action x logs map
 	c.ActionResponses = make(map[string][]string) // refresh action x responses map
 	c.ActionExtras = make(map[string][]string)    // refresh action x extras map
-	c.SortedActions = nil                         // refresh sorted actions (for !commands)
 	c.actionAjuda = make(map[string]string)       // refresh action x Ajuda texts
 	c.actionHelp = make(map[string]string)        // refresh action x Help texts
 	for _, command := range c.Commands {
@@ -248,7 +247,29 @@ func (c *Commands) refreshCache() {
 		if len(command.Actions) < 1 {
 			continue
 		}
-		c.SortedActions = append(c.SortedActions, command.Actions[0])
 	}
-	sort.Strings(c.SortedActions)
+}
+
+func (c *Commands) Actions() string {
+	var sortedActions []string
+	for _, command := range c.Commands {
+		sortedActions = append(sortedActions, actionLabel(command.Actions))
+	}
+	sort.Strings(sortedActions)
+	return strings.Join(sortedActions, " ")
+}
+
+func actionLabel(actions []string) string {
+	count := 0
+	for _, action := range actions {
+		key := redisKeyCommandsPrefix + action[1:]
+		str := red.Get(key).Val()
+		if i, err := strconv.Atoi(str); err == nil {
+			count += i
+		}
+	}
+	if count == 0 {
+		return actions[0]
+	}
+	return fmt.Sprintf("%v (%v)", actions[0], count)
 }
