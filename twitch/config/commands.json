@@ -487,6 +487,17 @@
         "/color yellowgreen",
         "/me vídeo sobre VIM, Rails, nnn, etc: https://www.youtube.com/watch?v=uwf6Cu4mQco&list=PLyR9xTdgYCd9n4V5EK86aEqMd59QZeDD9&index=140&t=3451s"
       ]
+    },
+    {
+      "help": "ELM playlist",
+      "ajuda": "Playlist sobre ELM",
+      "actions": [
+        "!elm"
+      ],
+      "responses": [
+        "/color yellowgreen",
+        "/me playlist com videos sobre ELM: https://www.youtube.com/playlist?list=PLyR9xTdgYCd_HB0mgR9INq31iqpi4dMn5"
+      ]
     }
   ]
 }
