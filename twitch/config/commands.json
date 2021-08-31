@@ -457,6 +457,7 @@
     {
       "help": "Updates the marquee",
       "ajuda": "Atualiza a mensagem rotativa",
+      "admin": true,
       "actions": [
         "!marquee",
         "!marq"

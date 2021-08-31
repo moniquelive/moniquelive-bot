@@ -136,11 +136,6 @@ func NewTwitch(username, oauth string, cmd *commands.Commands, amqpChannel *amqp
 		if message.User.ID == streamlabsID {
 			return
 		}
-		if message.User.ID != moniqueID && strings.HasPrefix(message.Message, "!marq") {
-			t.Say("/color firebrick")
-			t.Say("Desculpa ai " + message.User.DisplayName + ", esse é só da Mo!")
-			return
-		}
 		// cai fora rápido se não for comando que começa com '!'
 		if message.Message == "!" || message.Message[0] != '!' {
 			return
@@ -152,6 +147,12 @@ func NewTwitch(username, oauth string, cmd *commands.Commands, amqpChannel *amqp
 			cmdLine = strings.Join(split[1:], " ")
 		}
 		extras, _ := cmd.ActionExtras[action]
+		admin, _ := cmd.ActionAdmin[action]
+		if admin && message.User.ID != moniqueID {
+			t.Say("/color firebrick")
+			t.Say("Desculpa ai " + message.User.DisplayName + ", esse é só da Mo!")
+			return
+		}
 		if responses, ok := cmd.ActionResponses[action]; ok {
 			for _, unparsedResponse := range responses {
 				parsedResponse, err := t.parseTemplate(

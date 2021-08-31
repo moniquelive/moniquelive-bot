@@ -24,10 +24,12 @@ type Commands struct {
 		Extras    []string `json:"extras"`
 		Ajuda     string   `json:"ajuda"`
 		Help      string   `json:"help"`
+		Admin     bool     `json:"admin"`
 	} `json:"commands"`
 	ActionResponses map[string][]string
 	ActionLogs      map[string][]string
 	ActionExtras    map[string][]string
+	ActionAdmin     map[string]bool
 	actionAjuda     map[string]string
 	actionHelp      map[string]string
 }
@@ -229,17 +231,20 @@ func (c *Commands) refreshCache() {
 	c.ActionLogs = make(map[string][]string)      // refresh action x logs map
 	c.ActionResponses = make(map[string][]string) // refresh action x responses map
 	c.ActionExtras = make(map[string][]string)    // refresh action x extras map
+	c.ActionAdmin = make(map[string]bool)         // refresh action x admin map
 	c.actionAjuda = make(map[string]string)       // refresh action x Ajuda texts
 	c.actionHelp = make(map[string]string)        // refresh action x Help texts
 	for _, command := range c.Commands {
 		responses := command.Responses
 		extras := command.Extras
+		admin := command.Admin
 		logs := command.Logs
 		ajuda := command.Ajuda
 		help := command.Help
 		for _, action := range command.Actions {
 			c.ActionResponses[action] = responses
 			c.ActionExtras[action] = extras
+			c.ActionAdmin[action] = admin
 			c.ActionLogs[action] = logs
 			c.actionAjuda[action] = ajuda
 			c.actionHelp[action] = help
