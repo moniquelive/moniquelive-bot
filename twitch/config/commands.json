@@ -511,6 +511,19 @@
         "/color yellowgreen",
         "/me playlist com videos sobre ELM: https://www.youtube.com/playlist?list=PLyR9xTdgYCd_HB0mgR9INq31iqpi4dMn5"
       ]
+    },
+    {
+      "help": "Vinhator project",
+      "ajuda": "Projeto Vinhator",
+      "actions": [
+        "!vinheta",
+        "!vinhetor",
+        "!vin"
+      ],
+      "responses": [
+        "/color yellowgreen",
+        "/me repo do projeto: https://github.com/moniquelive/vinhator"
+      ]
     }
   ]
 }
