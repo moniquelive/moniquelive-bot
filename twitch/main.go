@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/go-redis/redis"
 	"github.com/moniquelive/moniquelive-bot/twitch/commands"
 
 	"github.com/google/uuid"
@@ -23,6 +24,7 @@ const (
 	queueName          = "ms.twitch"
 	createTtsTopicName = "create_tts"
 	spotifyTopicName   = "spotify_music_updated"
+	musicSkipPollName  = "twitch-bot:twitch:poll:skip_music"
 )
 
 var (
@@ -149,7 +151,21 @@ func handle(deliveries <-chan amqp.Delivery, client *Twitch) {
 			continue
 		}
 		client.Say("/color Chocolate")
-		client.Say(fmt.Sprintf("/me %v - %v - %v - %v",
-			songInfo.Artist, songInfo.Title, songInfo.ImgUrl, songInfo.SongUrl))
+		client.Say(fmt.Sprintf("/me %v - %v - %v - %v (%vs)",
+			songInfo.Artist, songInfo.Title, songInfo.ImgUrl, songInfo.SongUrl, songInfo.Length))
+
+		createPoll(songInfo.Length)
 	}
+}
+
+func createPoll(ttl int64) {
+	r := redis.NewClient(&redis.Options{Addr: redisURL})
+	if r.Ping().Err() != nil {
+		log.Println("Twitch.createPoll > Sem redis...")
+		return
+	}
+	defer r.Close()
+	r.Del(musicSkipPollName)
+	r.SAdd(musicSkipPollName, ".")
+	r.Expire(musicSkipPollName, time.Duration(ttl)*time.Second)
 }

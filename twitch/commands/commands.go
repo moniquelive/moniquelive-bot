@@ -38,6 +38,8 @@ const (
 	redisUrlsKeyPrefix     = "twitch-bot:twitch_stats:urls:"
 	redisSeenAtKeyPrefix   = "twitch-bot:twitch_stats:seen_at:"
 	redisKeyCommandsPrefix = "twitch-bot:twitch_stats:command:"
+	skipMusicTopicName     = "spotify_music_skip"
+	musicSkipPollName      = "twitch-bot:twitch:poll:skip_music"
 )
 
 var (
@@ -187,32 +189,23 @@ func (c Commands) Uptime(cmdLine string) string {
 }
 
 func (c Commands) Marquee(cmdLine string) string {
-	amqpURL := os.Getenv("RABBITMQ_URL")
-	conn, err := amqp.Dial(amqpURL)
-	if err != nil {
-		log.Errorln("Marquee > amqp.Dial:", err)
-		return ""
-	}
-	defer conn.Close()
-	go func() { <-conn.NotifyClose(make(chan *amqp.Error)) }()
-	channel, err := conn.Channel()
-	if err != nil {
-		log.Errorln("Marquee > conn.Channel:", err)
-		return ""
-	}
-	defer channel.Close()
-	err = channel.Publish("amq.topic", "marquee_updated", false, false, amqp.Publishing{
-		ContentType:     "application/json",
-		ContentEncoding: "utf-8",
-		DeliveryMode:    2,
-		Expiration:      "60000",
-		Body:            []byte(cmdLine),
-	})
-	if err != nil {
-		log.Errorln("Marquee > channel.Publish:", err)
-		return ""
+	if err := notifyAMQPTopic("marquee_updated", cmdLine); err != nil {
+		log.Errorln("Marquee > notifyAMQPTopic:", err)
 	}
 	return "Atualizando marquee: " + cmdLine
+}
+
+func (c Commands) Skip(username string) string {
+	username = strings.ToLower(username)
+	red.SAdd(musicSkipPollName, username)
+	votes := red.SCard(musicSkipPollName).Val() - 1
+	if votes > 5 {
+		if err := notifyAMQPTopic(skipMusicTopicName, ""); err != nil {
+			log.Errorln("Skip > notifyAMQPTopic:", err)
+		}
+		return "PULANDO!!!! 💃"
+	}
+	return fmt.Sprintf("Votos parciais: %v", votes)
 }
 
 func (c *Commands) Reload() {
@@ -277,4 +270,30 @@ func actionLabel(actions []string) string {
 		return actions[0]
 	}
 	return fmt.Sprintf("%v (%v)", actions[0], count)
+}
+
+func notifyAMQPTopic(topicName, body string) error {
+	amqpURL := os.Getenv("RABBITMQ_URL")
+	conn, err := amqp.Dial(amqpURL)
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+	go func() { <-conn.NotifyClose(make(chan *amqp.Error)) }()
+	channel, err := conn.Channel()
+	if err != nil {
+		return err
+	}
+	defer channel.Close()
+	err = channel.Publish("amq.topic", topicName, false, false, amqp.Publishing{
+		ContentType:     "application/json",
+		ContentEncoding: "utf-8",
+		DeliveryMode:    2,
+		Expiration:      "60000",
+		Body:            []byte(body),
+	})
+	if err != nil {
+		return err
+	}
+	return nil
 }

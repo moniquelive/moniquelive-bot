@@ -524,6 +524,19 @@
         "/color yellowgreen",
         "/me repo do projeto: https://github.com/moniquelive/vinhator"
       ]
+    },
+    {
+      "help": "Skip current song",
+      "ajuda": "Pula música atual",
+      "actions": [
+        "!skip",
+        "!pula",
+        "!vaza"
+      ],
+      "responses": [
+        "/color yellowgreen",
+        "/me {{ .Command.Skip .SenderUsername }}"
+      ]
     }
   ]
 }
