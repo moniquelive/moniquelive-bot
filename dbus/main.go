@@ -35,6 +35,7 @@ type SongInfo struct {
 	SongUrl string `json:"songUrl"`
 	Title   string `json:"title"`
 	Artist  string `json:"artist"`
+	Length  int64  `json:"length"`
 }
 
 func init() {
@@ -187,12 +188,14 @@ func listenToDbus(channel *amqp.Channel, done <-chan struct{}) error {
 				SongUrl: songUrl,
 				Title:   title,
 				Artist:  artist,
+				Length:  int64(lengthInMillis / 1000),
 			}
 			//log.Debugln(songInfo)
 			infoBytes, err := json.Marshal(songInfo)
 			if err != nil {
 				log.Errorln("listenToDbus > jsonMarshal:", err)
 			}
+			red.Set(redisKey, infoBytes, time.Duration(lengthInMillis)*time.Millisecond)
 			err = channel.Publish("amq.topic", musicUpdatedTopicName, false, false, amqp.Publishing{
 				ContentType:     "application/json",
 				ContentEncoding: "utf-8",
@@ -203,7 +206,6 @@ func listenToDbus(channel *amqp.Channel, done <-chan struct{}) error {
 			if err != nil {
 				log.Errorln("listenToDbus > channel.Publish:", err)
 			}
-			red.Set(redisKey, infoBytes, time.Duration(lengthInMillis)*time.Millisecond)
 		}
 	}
 }
@@ -234,8 +236,8 @@ func handle(deliveries <-chan amqp.Delivery, done <-chan struct{}) {
 			switch delivery.RoutingKey {
 			case skipMusicTopicName:
 				dbusConn.
-				Object(spotify, "/org/mpris/MediaPlayer2").
-				Call("org.mpris.MediaPlayer2.Player.Next", 0)
+					Object(spotify, "/org/mpris/MediaPlayer2").
+					Call("org.mpris.MediaPlayer2.Player.Next", 0)
 			}
 
 			_ = delivery.Ack(false)

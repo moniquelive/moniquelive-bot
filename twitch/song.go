@@ -7,6 +7,7 @@ type songInfo struct {
 	SongUrl string `json:"songUrl"`
 	Title   string `json:"title"`
 	Artist  string `json:"artist"`
+	Length  int64  `json:"length"`
 }
 
 func parseSongInfo(bb []byte, songInfo *songInfo) error {
