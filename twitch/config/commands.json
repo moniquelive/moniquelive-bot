@@ -201,7 +201,18 @@
         "!emote"
       ],
       "responses": [
-        "catJAM KEKW AYAYA weSmart popCat WAYTOODANK kumaPls CuteDog miyanoHype CouldYouNot HAMDANCE elmoFire chikaPls nodeBounce taPassadaFace seguePix"
+        "catJAM KEKW 02Pat Noted popCat HACKERCAT kumaPls CuteDog miyanoHype CouldYouNot HAMDANCE elmoFire chikaPls nodeBounce taPassadaFace seguePix"
+      ]
+    },
+    {
+      "help": "Shows all FrankerFaceZ emojis",
+      "ajuda": "Mostra todos os emojis da FrankerFaceZ",
+      "actions": [
+        "!franker",
+        "!frank"
+      ],
+      "responses": [
+        "weSmart"
       ]
     },
     {
