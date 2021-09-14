@@ -1,7 +1,10 @@
 package commands
 
 import (
+	"os"
 	"strings"
+
+	"github.com/streadway/amqp"
 )
 
 func WordWrap(str string, size int) (retval []string) {
@@ -33,4 +36,30 @@ func In(elem string, slice []string) bool {
 		}
 	}
 	return false
+}
+
+func notifyAMQPTopic(topicName, body string) error {
+	amqpURL := os.Getenv("RABBITMQ_URL")
+	conn, err := amqp.Dial(amqpURL)
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+	go func() { <-conn.NotifyClose(make(chan *amqp.Error)) }()
+	channel, err := conn.Channel()
+	if err != nil {
+		return err
+	}
+	defer channel.Close()
+	err = channel.Publish("amq.topic", topicName, false, false, amqp.Publishing{
+		ContentType:     "application/json",
+		ContentEncoding: "utf-8",
+		DeliveryMode:    2,
+		Expiration:      "60000",
+		Body:            []byte(body),
+	})
+	if err != nil {
+		return err
+	}
+	return nil
 }

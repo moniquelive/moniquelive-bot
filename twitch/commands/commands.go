@@ -12,7 +12,6 @@ import (
 
 	"github.com/go-redis/redis"
 	"github.com/sirupsen/logrus"
-	"github.com/streadway/amqp"
 )
 
 type Commands struct {
@@ -272,30 +271,4 @@ func actionLabel(actions []string) string {
 		return actions[0]
 	}
 	return fmt.Sprintf("%v (%v)", actions[0], count)
-}
-
-func notifyAMQPTopic(topicName, body string) error {
-	amqpURL := os.Getenv("RABBITMQ_URL")
-	conn, err := amqp.Dial(amqpURL)
-	if err != nil {
-		return err
-	}
-	defer conn.Close()
-	go func() { <-conn.NotifyClose(make(chan *amqp.Error)) }()
-	channel, err := conn.Channel()
-	if err != nil {
-		return err
-	}
-	defer channel.Close()
-	err = channel.Publish("amq.topic", topicName, false, false, amqp.Publishing{
-		ContentType:     "application/json",
-		ContentEncoding: "utf-8",
-		DeliveryMode:    2,
-		Expiration:      "60000",
-		Body:            []byte(body),
-	})
-	if err != nil {
-		return err
-	}
-	return nil
 }
