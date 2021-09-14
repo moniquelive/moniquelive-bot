@@ -198,12 +198,14 @@ func (c Commands) Marquee(cmdLine string) string {
 func (c Commands) Skip(username string) string {
 	username = strings.ToLower(username)
 	red.SAdd(musicSkipPollName, username)
-	votes := red.SCard(musicSkipPollName).Val() - 1
+	members := red.SMembers(musicSkipPollName).Val()
+	votes := len(members) - 1
 	if votes > 5 {
 		if err := notifyAMQPTopic(skipMusicTopicName, ""); err != nil {
 			log.Errorln("Skip > notifyAMQPTopic:", err)
 		}
-		return "PULANDO!!!! 💃"
+		sort.Strings(members)
+		return fmt.Sprintf("PULANDO!!!! 💃 (%v)", strings.Join(members[1:], ", "))
 	}
 	return fmt.Sprintf("Votos parciais: %v", votes)
 }
