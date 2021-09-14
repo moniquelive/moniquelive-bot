@@ -201,7 +201,7 @@
         "!emote"
       ],
       "responses": [
-        "catJAM KEKW 02Pat Noted popCat HACKERCAT kumaPls CuteDog miyanoHype CouldYouNot HAMDANCE elmoFire chikaPls nodeBounce taPassadaFace seguePix"
+        "catJAM Aaaaa 02Pat Noted popCat HACKERCAT kumaPls CuteDog miyanoHype CouldYouNot HAMDANCE elmoFire chikaPls nodeBounce taPassadaFace seguePix"
       ]
     },
     {
@@ -212,7 +212,7 @@
         "!frank"
       ],
       "responses": [
-        "weSmart"
+        "weSmart KEKW pikachuS"
       ]
     },
     {
@@ -225,7 +225,7 @@
       ],
       "responses": [
         "/color YellowGreen",
-        "/me https://open.spotify.com/playlist/6tPcPBeTEoPqaZcR03IzwN?si=yuQXN9RpSWyckstQKjRFpA"
+        "/me ouça e/ou colabore! https://open.spotify.com/playlist/6tPcPBeTEoPqaZcR03IzwN?si=yuQXN9RpSWyckstQKjRFpA"
       ]
     },
     {
@@ -384,7 +384,8 @@
         "${target} foi banid@ por ser programador Senior com 2 anos de experiência em React",
         "${target} foi banid@ por que fez chmod -R 777 /",
         "${target} foi banid@ por testar em prod",
-        "${target} foi banid@ por abusar da boa vontade da Pérola"
+        "${target} foi banid@ por abusar da boa vontade da Pérola",
+        "${target} foi banid@ por pular uma música bacana"
       ]
     },
     {
@@ -531,7 +532,14 @@
       "actions": [
         "!skip",
         "!pula",
-        "!vaza"
+        "!vaza",
+        "!rala",
+        "!shispa",
+        "!xispa",
+        "!temanca",
+        "!xo",
+        "!fora",
+        "!passa"
       ],
       "responses": [
         "/color yellowgreen",
