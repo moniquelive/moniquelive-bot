@@ -64,7 +64,7 @@ type alias Model =
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( { currentSong = SongInfo "" "" ""
-      , currentSongStyle = Animation.styleWith (Animation.spring stiff) [ Animation.left (percent 100) ]
+      , currentSongStyle = Animation.style [ Animation.translate (percent 115) (percent 0) ]
       , marqueeMessage = ""
       , isMarqueeVisible = False
       }
@@ -108,9 +108,13 @@ update msg model =
                                     let
                                         newCurrentSongStyle =
                                             Animation.interrupt
-                                                [ Animation.to [ Animation.left (percent 0) ]
+                                                [ Animation.to
+                                                    [ Animation.translate (percent 0) (percent 0)
+                                                    ]
                                                 , Animation.wait (Time.millisToPosix <| 8 * 1000)
-                                                , Animation.to [ Animation.left (percent 100) ]
+                                                , Animation.to
+                                                    [ Animation.translate (percent 115) (percent 0)
+                                                    ]
                                                 ]
                                                 model.currentSongStyle
                                     in
