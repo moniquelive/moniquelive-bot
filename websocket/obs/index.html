@@ -27,21 +27,6 @@
           color: #53777A;
       }
 
-      @keyframes in-out {
-          0% {
-              transform: translateX(calc(100% + 16px))
-          }
-          25% {
-              transform: translateX(0%)
-          }
-          75% {
-              transform: translateX(0%)
-          }
-          100% {
-              transform: translateX(calc(100% + 16px))
-          }
-      }
-
       @keyframes in-out-marquee {
           0% {
               transform: translateY(calc(100% + 1.1rem))
@@ -83,7 +68,7 @@
           margin-right: 16px;
           margin-bottom: 16px;
 
-          transform: translateX(calc(100% + 16px));
+          position: relative;
       }
 
       .container {

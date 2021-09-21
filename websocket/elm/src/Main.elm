@@ -1,5 +1,7 @@
 port module Main exposing (..)
 
+import Animation exposing (percent, px)
+import Animation.Spring.Presets exposing (stiff)
 import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -7,6 +9,7 @@ import Html.Events exposing (..)
 import Json.Decode as D
 import Process
 import Task
+import Time
 
 
 
@@ -51,8 +54,8 @@ type alias SongInfo =
 
 
 type alias Model =
-    { isBannerMoving : Bool
-    , currentSong : SongInfo
+    { currentSong : SongInfo
+    , currentSongStyle : Animation.State
     , marqueeMessage : String
     , isMarqueeVisible : Bool
     }
@@ -60,8 +63,8 @@ type alias Model =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( { isBannerMoving = False
-      , currentSong = SongInfo "" "" ""
+    ( { currentSong = SongInfo "" "" ""
+      , currentSongStyle = Animation.styleWith (Animation.spring stiff) [ Animation.left (percent 100) ]
       , marqueeMessage = ""
       , isMarqueeVisible = False
       }
@@ -75,7 +78,7 @@ init _ =
 
 type Msg
     = Recv String
-    | StopBanner
+    | Animate Animation.Msg
     | MarqueeTick
     | StopMarquee
 
@@ -83,6 +86,13 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        Animate animMsg ->
+            let
+                newCurrentSongStyle =
+                    Animation.update animMsg model.currentSongStyle
+            in
+            ( { model | currentSongStyle = newCurrentSongStyle }, Cmd.none )
+
         MarqueeTick ->
             ( { model | isMarqueeVisible = True }
             , Process.sleep 65000 |> Task.perform (always StopMarquee)
@@ -95,8 +105,20 @@ update msg model =
                         "spotify_music_updated" ->
                             case D.decodeString songInfoDecoder ws.payload of
                                 Ok song ->
-                                    ( { model | currentSong = song, isBannerMoving = True }
-                                    , Process.sleep 15000 |> Task.perform (always StopBanner)
+                                    let
+                                        newCurrentSongStyle =
+                                            Animation.interrupt
+                                                [ Animation.to [ Animation.left (percent 0) ]
+                                                , Animation.wait (Time.millisToPosix <| 8 * 1000)
+                                                , Animation.to [ Animation.left (percent 100) ]
+                                                ]
+                                                model.currentSongStyle
+                                    in
+                                    ( { model
+                                        | currentSong = song
+                                        , currentSongStyle = newCurrentSongStyle
+                                      }
+                                    , Cmd.none
                                     )
 
                                 Err _ ->
@@ -114,11 +136,6 @@ update msg model =
                 Err _ ->
                     ( model, Cmd.none )
 
-        StopBanner ->
-            ( { model | isBannerMoving = False }
-            , Cmd.none
-            )
-
         StopMarquee ->
             ( { model | isMarqueeVisible = False }
             , Process.sleep 30000 |> Task.perform (always MarqueeTick)
@@ -130,8 +147,11 @@ update msg model =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions _ =
-    messageReceiver Recv
+subscriptions model =
+    Sub.batch
+        [ messageReceiver Recv
+        , Animation.subscription Animate [ model.currentSongStyle ]
+        ]
 
 
 
@@ -152,11 +172,9 @@ view : Model -> Html Msg
 view model =
     div [ id "root" ]
         [ div
-            [ classList
-                [ ( "main", True )
-                , ( "animate", model.isBannerMoving )
-                ]
-            ]
+            (Animation.render model.currentSongStyle
+                ++ [ class "main" ]
+            )
             (songInfoView model.currentSong)
         , node "marquee"
             [ attribute "scrolldelay" "60"
