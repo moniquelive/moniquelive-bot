@@ -1,7 +1,7 @@
 port module Main exposing (..)
 
 import Animation exposing (percent, px)
-import Animation.Spring.Presets exposing (stiff)
+import Animation.Spring.Presets exposing (stiff, wobbly)
 import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -64,7 +64,7 @@ type alias Model =
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( { currentSong = SongInfo "" "" ""
-      , currentSongStyle = Animation.style [ Animation.translate (percent 115) (percent 0) ]
+      , currentSongStyle = Animation.styleWith (Animation.spring wobbly) [ Animation.translate (percent 115) (percent 0) ]
       , marqueeMessage = ""
       , isMarqueeVisible = False
       }
@@ -108,13 +108,9 @@ update msg model =
                                     let
                                         newCurrentSongStyle =
                                             Animation.interrupt
-                                                [ Animation.to
-                                                    [ Animation.translate (percent 0) (percent 0)
-                                                    ]
+                                                [ Animation.to [ Animation.translate (percent 0) (percent 0) ]
                                                 , Animation.wait (Time.millisToPosix <| 8 * 1000)
-                                                , Animation.to
-                                                    [ Animation.translate (percent 115) (percent 0)
-                                                    ]
+                                                , Animation.to [ Animation.translate (percent 115) (percent 0) ]
                                                 ]
                                                 model.currentSongStyle
                                     in
