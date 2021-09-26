@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"regexp"
 	"strings"
 	"text/template"
 
@@ -134,6 +135,14 @@ func NewTwitch(username, oauth string, cmd *commands.Commands, amqpChannel *amqp
 		// deny list...
 		//
 		if message.User.ID == streamlabsID {
+			rex := regexp.MustCompile(`Thank you for following (.*?)!`)
+			if capture := rex.FindStringSubmatch(message.Message); capture != nil {
+				nick := capture[1]
+				if strings.HasPrefix(strings.ToLower(nick), "hoss00312_") {
+					t.Say("/ban " + nick)
+					log.Println(colorRed, "!! TCHAU QUERIDO:", nick)
+				}
+			}
 			return
 		}
 		// cai fora rápido se não for comando que começa com '!'
