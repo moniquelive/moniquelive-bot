@@ -135,14 +135,7 @@ func NewTwitch(username, oauth string, cmd *commands.Commands, amqpChannel *amqp
 		// deny list...
 		//
 		if message.User.ID == streamlabsID {
-			rex := regexp.MustCompile(`Thank you for following (.*?)!`)
-			if capture := rex.FindStringSubmatch(message.Message); capture != nil {
-				nick := capture[1]
-				if strings.HasPrefix(strings.ToLower(nick), "hoss00312_") {
-					t.Say("/ban " + nick)
-					log.Println(colorRed, "!! TCHAU QUERIDO:", nick)
-				}
-			}
+			t.denyList(message)
 			return
 		}
 		// cai fora rápido se não for comando que começa com '!'
@@ -210,6 +203,17 @@ func NewTwitch(username, oauth string, cmd *commands.Commands, amqpChannel *amqp
 	client.Join(channel)
 
 	return t, nil
+}
+
+func (t Twitch) denyList(message irc.PrivateMessage) {
+	rex := regexp.MustCompile(`Thank you for following (.*?)!`)
+	if capture := rex.FindStringSubmatch(message.Message); capture != nil {
+		nick := capture[1]
+		if strings.HasPrefix(strings.ToLower(nick), "hoss00312_") {
+			t.Say("/ban " + nick)
+			log.Println(colorRed, "!! TCHAU QUERIDO:", nick)
+		}
+	}
 }
 
 func publishTwitchMessage(amqpChannel *amqp.Channel, rawMessage string) {
