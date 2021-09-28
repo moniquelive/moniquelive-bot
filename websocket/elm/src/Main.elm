@@ -1,14 +1,11 @@
 port module Main exposing (..)
 
-import Animation exposing (percent, px)
-import Animation.Spring.Presets exposing (stiff, wobbly)
+import Animation exposing (percent)
+import Animation.Spring.Presets exposing (wobbly)
 import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (..)
 import Json.Decode as D
-import Process
-import Task
 import Time
 
 
@@ -57,7 +54,7 @@ type alias Model =
     { currentSong : SongInfo
     , currentSongStyle : Animation.State
     , marqueeMessage : String
-    , isMarqueeVisible : Bool
+    , marqueeStyle : Animation.State
     }
 
 
@@ -66,9 +63,9 @@ init _ =
     ( { currentSong = SongInfo "" "" ""
       , currentSongStyle = Animation.styleWith (Animation.spring wobbly) [ Animation.translate (percent 115) (percent 0) ]
       , marqueeMessage = ""
-      , isMarqueeVisible = False
+      , marqueeStyle = Animation.styleWith (Animation.spring wobbly) [ Animation.translate (percent 0) (percent 100) ]
       }
-    , Process.sleep 30000 |> Task.perform (always MarqueeTick)
+    , Cmd.none
     )
 
 
@@ -79,8 +76,6 @@ init _ =
 type Msg
     = Recv String
     | Animate Animation.Msg
-    | MarqueeTick
-    | StopMarquee
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -90,12 +85,15 @@ update msg model =
             let
                 newCurrentSongStyle =
                     Animation.update animMsg model.currentSongStyle
-            in
-            ( { model | currentSongStyle = newCurrentSongStyle }, Cmd.none )
 
-        MarqueeTick ->
-            ( { model | isMarqueeVisible = True }
-            , Process.sleep 65000 |> Task.perform (always StopMarquee)
+                newMarqueeStyle =
+                    Animation.update animMsg model.marqueeStyle
+            in
+            ( { model
+                | currentSongStyle = newCurrentSongStyle
+                , marqueeStyle = newMarqueeStyle
+              }
+            , Cmd.none
             )
 
         Recv message ->
@@ -128,18 +126,30 @@ update msg model =
                             ( model, playUrl ws.payload )
 
                         "marquee_updated" ->
-                            ( { model | marqueeMessage = ws.payload }, Cmd.none )
+                            let
+                                newMarqueeStyle =
+                                    Animation.interrupt
+                                        [ Animation.loop
+                                            [ Animation.to [ Animation.translate (percent 0) (percent 0) ]
+                                            , Animation.wait (Time.millisToPosix <| 60 * 1000)
+                                            , Animation.to [ Animation.translate (percent 0) (percent 100) ]
+                                            , Animation.wait (Time.millisToPosix <| 30 * 1000)
+                                            ]
+                                        ]
+                                        model.marqueeStyle
+                            in
+                            ( { model
+                                | marqueeMessage = ws.payload
+                                , marqueeStyle = newMarqueeStyle
+                              }
+                            , Cmd.none
+                            )
 
                         _ ->
                             ( model, Cmd.none )
 
                 Err _ ->
                     ( model, Cmd.none )
-
-        StopMarquee ->
-            ( { model | isMarqueeVisible = False }
-            , Process.sleep 30000 |> Task.perform (always MarqueeTick)
-            )
 
 
 
@@ -150,7 +160,10 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ messageReceiver Recv
-        , Animation.subscription Animate [ model.currentSongStyle ]
+        , Animation.subscription Animate
+            [ model.currentSongStyle
+            , model.marqueeStyle
+            ]
         ]
 
 
@@ -177,9 +190,9 @@ view model =
             )
             (songInfoView model.currentSong)
         , node "marquee"
-            [ attribute "scrolldelay" "60"
-            , classList [ ( "animate-marquee", model.isMarqueeVisible ) ]
-            ]
+            (Animation.render model.marqueeStyle
+                ++ [ attribute "scrolldelay" "60" ]
+            )
             [ text model.marqueeMessage ]
         ]
 

@@ -27,21 +27,6 @@
           color: #53777A;
       }
 
-      @keyframes in-out-marquee {
-          0% {
-              transform: translateY(calc(100% + 1.1rem))
-          }
-          25% {
-              transform: translateY(0%)
-          }
-          75% {
-              transform: translateY(0%)
-          }
-          100% {
-              transform: translateY(calc(100% + 1.1rem))
-          }
-      }
-
       * {
           margin: 0;
           padding: 0
@@ -88,22 +73,13 @@
           height: 64px;
       }
 
-      .animate {
-          animation: in-out 10s;
-      }
-
-      .animate-marquee {
-          animation: in-out-marquee 60s;
-      }
-
       marquee {
           background-color: rgba(0,0,0,0.3);
           color: #ff69b4;
           font-size: 64px;
-          position: absolute;
           width: 70%;
           left: 28%;
-          transform: translateY(calc(100% + 1.1rem));
+          position: absolute;
       }
       #root {
           display: contents;
