@@ -209,7 +209,8 @@ func (t Twitch) denyList(message irc.PrivateMessage) {
 	rex := regexp.MustCompile(`Thank you for following (.*?)!`)
 	if capture := rex.FindStringSubmatch(message.Message); capture != nil {
 		nick := capture[1]
-		if strings.HasPrefix(strings.ToLower(nick), "hoss00312_") {
+		if strings.HasPrefix(strings.ToLower(nick), "hoss00312_") ||
+			strings.HasSuffix(strings.ToLower(nick), "_hoss00312") {
 			t.Say("/ban " + nick)
 			log.Println(colorRed, "!! TCHAU QUERIDO:", nick)
 		}
