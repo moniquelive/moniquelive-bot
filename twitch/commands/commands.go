@@ -29,6 +29,7 @@ type Commands struct {
 	ActionLogs      map[string][]string
 	ActionExtras    map[string][]string
 	ActionAdmin     map[string]bool
+	ActionActions   map[string][]string
 	actionAjuda     map[string]string
 	actionHelp      map[string]string
 }
@@ -91,7 +92,8 @@ func (c Commands) Ajuda(cmdLine string) string {
 	}
 	action := strings.Split(cmdLine, " ")[0]
 	if help, ok := c.actionAjuda[action]; ok {
-		return fmt.Sprintf("%v: %v", action, help)
+		return fmt.Sprintf("%v: %v (sinônimos: %v)",
+			action, help, strings.Join(c.ActionActions[action], ", "))
 	}
 	return fmt.Sprintf("Comando %q não encontrado...", action)
 }
@@ -105,7 +107,8 @@ func (c Commands) Help(cmdLine string) string {
 	}
 	action := strings.Split(cmdLine, " ")[0]
 	if help, ok := c.actionHelp[action]; ok {
-		return fmt.Sprintf("%v: %v", action, help)
+		return fmt.Sprintf("%v: %v (aliases: %v)",
+			action, help, strings.Join(c.ActionActions[action], ", "))
 	}
 	return fmt.Sprintf("Help not found for %q...", action)
 }
@@ -240,12 +243,14 @@ func (c *Commands) refreshCache() {
 	c.ActionResponses = make(map[string][]string) // refresh action x responses map
 	c.ActionExtras = make(map[string][]string)    // refresh action x extras map
 	c.ActionAdmin = make(map[string]bool)         // refresh action x admin map
+	c.ActionActions = make(map[string][]string)   // refresh action x actions map
 	c.actionAjuda = make(map[string]string)       // refresh action x Ajuda texts
 	c.actionHelp = make(map[string]string)        // refresh action x Help texts
 	for _, command := range c.Commands {
 		responses := command.Responses
 		extras := command.Extras
 		admin := command.Admin
+		actions := command.Actions
 		logs := command.Logs
 		ajuda := command.Ajuda
 		help := command.Help
@@ -253,6 +258,7 @@ func (c *Commands) refreshCache() {
 			c.ActionResponses[action] = responses
 			c.ActionExtras[action] = extras
 			c.ActionAdmin[action] = admin
+			c.ActionActions[action] = actions
 			c.ActionLogs[action] = logs
 			c.actionAjuda[action] = ajuda
 			c.actionHelp[action] = help
