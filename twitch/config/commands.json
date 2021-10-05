@@ -527,8 +527,8 @@
       ]
     },
     {
-      "help": "Skip current song",
-      "ajuda": "Pula música atual",
+      "help": "Vote to skip current song",
+      "ajuda": "Vota para pular música atual",
       "actions": [
         "!skip",
         "!pula",
@@ -543,7 +543,24 @@
       ],
       "responses": [
         "/color yellowgreen",
-        "/me {{ .Command.Skip .SenderUsername }}"
+        "/me {{ .Command.SkipMusic .SenderUsername }}"
+      ]
+    },
+    {
+      "help": "Vote to keep current song",
+      "ajuda": "Vota para música não mudar",
+      "actions": [
+        "!noskip",
+        "!naopula",
+        "!fica",
+        "!gostei",
+        "!deixa",
+        "!boa",
+        "!hino"
+      ],
+      "responses": [
+        "/color yellowgreen",
+        "/me {{ .Command.KeepMusic .SenderUsername }}"
       ]
     }
   ]

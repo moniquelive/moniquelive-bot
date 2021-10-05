@@ -38,6 +38,16 @@ func In(elem string, slice []string) bool {
 	return false
 }
 
+func Remove(elem string, slice []string) (newSlice []string) {
+	newSlice = []string{}
+	for _, e := range slice {
+		if elem != e {
+			newSlice = append(newSlice, e)
+		}
+	}
+	return
+}
+
 func notifyAMQPTopic(topicName, body string) error {
 	amqpURL := os.Getenv("RABBITMQ_URL")
 	conn, err := amqp.Dial(amqpURL)

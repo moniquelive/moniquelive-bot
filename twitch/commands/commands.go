@@ -39,6 +39,7 @@ const (
 	redisKeyCommandsPrefix = "twitch-bot:twitch_stats:command:"
 	skipMusicTopicName     = "spotify_music_skip"
 	musicSkipPollName      = "twitch-bot:twitch:poll:skip_music"
+	musicKeepPollName      = "twitch-bot:twitch:poll:keep_music"
 )
 
 var (
@@ -194,19 +195,32 @@ func (c Commands) Marquee(cmdLine string) string {
 	return "Atualizando marquee: " + cmdLine
 }
 
-func (c Commands) Skip(username string) string {
+func (c Commands) SkipMusic(username string) string {
 	username = strings.ToLower(username)
 	red.SAdd(musicSkipPollName, username)
-	members := red.SMembers(musicSkipPollName).Val()
-	votes := len(members) - 1
-	if votes > 5 {
+	skipMembers := red.SMembers(musicSkipPollName).Val()
+	keepMembers := red.SMembers(musicKeepPollName).Val()
+	skipVotes := len(skipMembers) - 1
+	keepVotes := len(keepMembers) - 1
+	if skipVotes-keepVotes > 5 {
 		if err := notifyAMQPTopic(skipMusicTopicName, ""); err != nil {
 			log.Errorln("Skip > notifyAMQPTopic:", err)
 		}
-		sort.Strings(members)
-		return fmt.Sprintf("PULANDO!!!! 💃 (%v)", strings.Join(members[1:], ", "))
+		sort.Strings(skipMembers)
+		return fmt.Sprintf("PULANDO!!!! 💃 (%v) X (%v)",
+			strings.Join(Remove(".", skipMembers), ", "),
+			strings.Join(Remove(".", keepMembers), ", "),
+		)
 	}
-	return fmt.Sprintf("Votos parciais: %v", votes)
+	return fmt.Sprintf("Votos parciais: (vaza: %v X fica: %v)", skipVotes, keepVotes)
+}
+
+func (c Commands) KeepMusic(username string) string {
+	username = strings.ToLower(username)
+	red.SAdd(musicKeepPollName, username)
+	keepVotes := len(red.SMembers(musicKeepPollName).Val()) - 1
+	skipVotes := len(red.SMembers(musicSkipPollName).Val()) - 1
+	return fmt.Sprintf("Aaaaa parciais: (vaza: %v X fica: %v)", skipVotes, keepVotes)
 }
 
 func (c *Commands) Reload() {

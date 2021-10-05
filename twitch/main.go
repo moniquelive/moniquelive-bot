@@ -25,6 +25,7 @@ const (
 	createTtsTopicName = "create_tts"
 	spotifyTopicName   = "spotify_music_updated"
 	musicSkipPollName  = "twitch-bot:twitch:poll:skip_music"
+	musicKeepPollName  = "twitch-bot:twitch:poll:keep_music"
 )
 
 var (
@@ -165,7 +166,10 @@ func createPoll(ttl int64) {
 		return
 	}
 	defer r.Close()
-	r.Del(musicSkipPollName)
-	r.SAdd(musicSkipPollName, ".")
-	r.Expire(musicSkipPollName, time.Duration(ttl)*time.Second)
+
+	for _, setName := range []string{musicSkipPollName, musicKeepPollName} {
+		r.Del(setName)
+		r.SAdd(setName, ".")
+		r.Expire(setName, time.Duration(ttl)*time.Second)
+	}
 }
