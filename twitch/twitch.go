@@ -115,7 +115,13 @@ func NewTwitch(username, oauth string, cmd *commands.Commands, amqpChannel *amqp
 	})
 
 	client.OnPrivateMessage(func(message irc.PrivateMessage) {
+		//
+		// atualiza contadores do !cmds
+		//
 		publishTwitchMessage(t.amqpChannel, message.Raw)
+		//
+		// ve se é o comando da pérola (channel points)
+		//
 		if rewardID, ok := message.Tags["custom-reward-id"]; ok && rewardID == TtsReward {
 			err := t.amqpChannel.Publish("amq.topic", createTtsTopicName, false, false, amqp.Publishing{
 				ContentType:     "text/plain",
@@ -127,20 +133,29 @@ func NewTwitch(username, oauth string, cmd *commands.Commands, amqpChannel *amqp
 			if err != nil {
 				log.Errorln("client.OnPrivateMessage > amqpChannel.Publish:", err)
 			}
+			return
 		}
 
-		setColorForUser(message.User.Name)
-		log.Printf("%s (%v): %s%s\n", message.User.DisplayName, message.User.ID, message.Message, colorReset)
+		// imprime log
+		logWithColors(message.User.Name,
+			fmt.Sprintf("%s (%v): %s", message.User.DisplayName, message.User.ID, message.Message))
+
 		//
-		// deny list...
+		// antivirus 🦠
 		//
 		if message.User.ID == streamlabsID {
-			t.denyList(message)
+			t.antivirus(message)
 			return
 		}
 		// cai fora rápido se não for comando que começa com '!'
 		if message.Message == "!" || message.Message[0] != '!' {
 			return
+		}
+		// pula comandos marcados para ignorar
+		for _, ignoredCommand := range cmd.IgnoredCommands {
+			if strings.HasPrefix(message.Message, ignoredCommand) {
+				return
+			}
 		}
 		split := strings.Split(message.Message, " ")
 		action := split[0]
@@ -148,64 +163,62 @@ func NewTwitch(username, oauth string, cmd *commands.Commands, amqpChannel *amqp
 		if len(split) > 1 {
 			cmdLine = strings.Join(split[1:], " ")
 		}
-		extras, _ := cmd.ActionExtras[action]
+		//
+		// verifica se é um comando privilegiado
+		//
 		admin, _ := cmd.ActionAdmin[action]
 		if admin && message.User.ID != moniqueID {
 			t.Say("/color firebrick")
 			t.Say("Desculpa ai " + message.User.DisplayName + ", esse é só da Mo!")
 			return
 		}
-		if responses, ok := cmd.ActionResponses[action]; ok {
-			for _, unparsedResponse := range responses {
-				parsedResponse, err := t.parseTemplate(
-					message.User.Name, unparsedResponse, cmdLine, extras)
-				if err != nil {
-					// TODO: SE LIVRAR DESTE LIXOOOOOOOOO
-					split := strings.Split(err.Error(), ": ")
-					errMsg := split[len(split)-1]
-					errMsg = strings.ToUpper(errMsg[0:1]) + errMsg[1:]
-					t.Say("/color red")
-					t.Say("/me " + errMsg)
-					return
-				}
-				for _, split := range strings.Split(parsedResponse, "\n") {
-					t.Say(split)
-				}
-			}
-			if logs := cmd.ActionLogs[action]; len(logs) > 0 {
-				for _, unparsedLog := range logs {
-					parsedLog, err := t.parseTemplate(
-						message.User.Name, unparsedLog, cmdLine, []string{})
-					if err != nil {
-						log.Println("erro de template:", err)
-						return
-					}
-					fmt.Println(parsedLog)
-				}
-			}
+
+		var (
+			responses []string
+			ok        bool
+		)
+		if responses, ok = cmd.ActionResponses[action]; !ok {
+			// comando desconhecido...
+			t.Say("/color firebrick")
+			t.Say("/me não conheço esse: " + message.Message)
 			return
 		}
 
-		// pula comandos marcados para ignorar
-		for _, ignoredCommand := range cmd.IgnoredCommands {
-			if strings.HasPrefix(message.Message, ignoredCommand) {
+		extras, _ := cmd.ActionExtras[action] // parametros extras do comando
+		for _, unparsedResponse := range responses {
+			parsedResponse, err := t.parseTemplate(message.User.Name, unparsedResponse, cmdLine, extras)
+			if err != nil {
+				// TODO: tentar reproduzir esta condição de erro...
+				split := strings.Split(err.Error(), ": ")
+				errMsg := split[len(split)-1]
+				errMsg = strings.ToUpper(errMsg[0:1]) + errMsg[1:]
+				t.Say("/color red")
+				t.Say("/me " + errMsg)
 				return
 			}
+			for _, split := range strings.Split(parsedResponse, "\n") {
+				t.Say(split)
+			}
 		}
-
-		// comando desconhecido...
-		if strings.HasPrefix(message.Message, "!") {
-			t.Say("/color firebrick")
-			t.Say("/me não conheço esse: " + message.Message)
+		var logs []string
+		if logs, ok = cmd.ActionLogs[action]; !ok || len(logs) == 0 {
+			return
+		}
+		for _, unparsedLog := range logs {
+			parsedLog, err := t.parseTemplate(message.User.Name, unparsedLog, cmdLine, []string{})
+			if err != nil {
+				log.Println("erro de template:", err)
+				return
+			}
+			fmt.Println(colorCyan, parsedLog, colorReset)
 		}
 	})
 
 	client.Join(channel)
-
 	return t, nil
 }
 
-func (t Twitch) denyList(message irc.PrivateMessage) {
+func (t Twitch) antivirus(message irc.PrivateMessage) {
 	rex := regexp.MustCompile(`Thank you for following (.*?)!`)
 	if capture := rex.FindStringSubmatch(message.Message); capture != nil {
 		nick := capture[1]
@@ -277,9 +290,11 @@ func (t Twitch) parseTemplate(
 	return parsed.String(), nil
 }
 
-func setColorForUser(userName string) {
+func logWithColors(userName, str string) {
 	switch userName {
 	case "acaverna", "streamlabs", "streamholics", "moniquelive_bot":
-		log.Println(colorCyan)
+		log.Println(colorCyan, str, colorReset)
+		return
 	}
+	log.Println(str)
 }

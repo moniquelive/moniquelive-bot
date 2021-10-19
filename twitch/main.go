@@ -36,6 +36,7 @@ var (
 
 func init() {
 	logrus.SetFormatter(&logrus.TextFormatter{
+		ForceColors: true,
 		FullTimestamp:   true,
 		TimestampFormat: time.StampMilli,
 	})
