@@ -1,6 +1,7 @@
 package commands
 
 import (
+	_ "embed"
 	"encoding/json"
 	"fmt"
 	"math/rand"
@@ -11,6 +12,7 @@ import (
 	"time"
 
 	"github.com/go-redis/redis"
+	"github.com/nicklaw5/helix"
 	"github.com/sirupsen/logrus"
 )
 
@@ -41,6 +43,7 @@ const (
 	skipMusicTopicName     = "spotify_music_skip"
 	musicSkipPollName      = "twitch-bot:twitch:poll:skip_music"
 	musicKeepPollName      = "twitch-bot:twitch:poll:keep_music"
+	MoniqueliveID          = "4930146"
 )
 
 var (
@@ -53,6 +56,13 @@ var (
 	log      = logrus.WithField("package", "commands")
 	redisURL = os.Getenv("REDIS_URL")
 	red      *redis.Client
+)
+var (
+	//go:embed .oauth_client_id
+	oauth_client_id string
+
+	//go:embed .oauth_client_secret
+	oauth_client_secret string
 )
 
 func init() {
@@ -215,7 +225,7 @@ func (c Commands) SkipMusic(username string) string {
 			strings.Join(Remove(".", keepMembers), ", "),
 		)
 	}
-	return fmt.Sprintf("Votos parciais: (vaza: %v X fica: %v)", skipVotes, keepVotes)
+	return fmt.Sprintf("Aaaaa parciais: (vaza: %v X fica: %v)", skipVotes, keepVotes)
 }
 
 func (c Commands) KeepMusic(username string) string {
@@ -223,7 +233,52 @@ func (c Commands) KeepMusic(username string) string {
 	red.SAdd(musicKeepPollName, username)
 	keepVotes := len(red.SMembers(musicKeepPollName).Val()) - 1
 	skipVotes := len(red.SMembers(musicSkipPollName).Val()) - 1
-	return fmt.Sprintf("Aaaaa parciais: (vaza: %v X fica: %v)", skipVotes, keepVotes)
+	return fmt.Sprintf("kumaPls parciais: (vaza: %v X fica: %v)", skipVotes, keepVotes)
+}
+
+func (c Commands) FollowAge(userID, userName string) string {
+	userID = strings.ToLower(userID)
+	if userID == "" {
+		return c.Ajuda("followage")
+	}
+	//
+	// autentica
+	//
+	var err error
+	var client *helix.Client
+	client, err = helix.NewClient(&helix.Options{
+		ClientID:     oauth_client_id,
+		ClientSecret: oauth_client_secret,
+	})
+	if err != nil {
+		return "Erro no login: " + err.Error()
+	}
+	var authResp *helix.AppAccessTokenResponse
+	authResp, err = client.RequestAppAccessToken(nil)
+	if err != nil {
+		return "Erro no access token: " + err.Error()
+	}
+	client.SetAppAccessToken(authResp.Data.AccessToken)
+	//
+	// pega tempo de seguida
+	//
+	var resp *helix.UsersFollowsResponse
+	resp, err = client.GetUsersFollows(&helix.UsersFollowsParams{
+		FromID: userID,
+		ToID:   MoniqueliveID,
+	})
+	if err != nil {
+		return "Erro no GetUsersFollows: " + err.Error()
+	}
+	//
+	// responde
+	//
+	if len(resp.Data.Follows) == 0 {
+		return "Algo de errado não está certo " + userName + "..."
+	}
+
+	duration := time.Since(resp.Data.Follows[0].FollowedAt)
+	return fmt.Sprintf("%s segue a monique live há %.2f dias", userName, duration.Hours()/24.0)
 }
 
 func (c *Commands) Reload() {

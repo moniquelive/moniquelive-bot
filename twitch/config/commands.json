@@ -201,7 +201,7 @@
         "!emote"
       ],
       "responses": [
-        "catJAM Aaaaa 02Pat Noted popCat HACKERCAT kumaPls CuteDog miyanoHype CouldYouNot HAMDANCE elmoFire chikaPls nodeBounce taPassadaFace seguePix"
+        "catJAM Aaaaa 02Pat NOTED popCat HACKERCAT kumaPls CuteDog miyanoHype CouldYouNot HAMDANCE elmoFire chikaPls nodeBounce taPassadaFace gopherPls"
       ]
     },
     {
@@ -303,7 +303,8 @@
       ],
       "responses": [
         "/color YellowGreen",
-        "/me Ergodox EZ (https://ergodox-ez.com/)"
+        "/me Ergodox EZ (https://ergodox-ez.com/)",
+        "/me Layout (https://configure.zsa.io/ergodox-ez/layouts/XqZeg/latest/0)"
       ]
     },
     {
@@ -488,7 +489,7 @@
       ],
       "responses": [
         "/color yellowgreen",
-        "/me vídeo que vai mudar a sua vida: https://www.youtube.com/watch?v=6JBBJQS6nX4&list=PLyR9xTdgYCd9n4V5EK86aEqMd59QZeDD9&index=130&t=2s"
+        "/me vídeo que vai mudar a sua vida: https://www.youtube.com/watch?v=6JBBJQS6nX4"
       ]
     },
     {
@@ -499,7 +500,7 @@
       ],
       "responses": [
         "/color yellowgreen",
-        "/me vídeo sobre VIM, Rails, nnn, etc: https://www.youtube.com/watch?v=uwf6Cu4mQco&list=PLyR9xTdgYCd9n4V5EK86aEqMd59QZeDD9&index=140&t=3451s"
+        "/me vídeo sobre VIM, Rails, nnn, etc: https://www.youtube.com/watch?v=uwf6Cu4mQco"
       ]
     },
     {
@@ -562,6 +563,22 @@
       "responses": [
         "/color yellowgreen",
         "/me {{ .Command.KeepMusic .SenderUsername }}"
+      ]
+    },
+    {
+      "help": "Since when do we follow this channel",
+      "ajuda": "Desde quando sigo este canal?",
+      "actions": [
+        "!followage",
+        "!follower",
+        "!quandoseguiu",
+        "!seguindo",
+        "!seguidor",
+        "!desde"
+      ],
+      "responses": [
+        "/color yellowgreen",
+        "/me {{ .Command.FollowAge .SenderUserID .SenderUsername }}"
       ]
     }
   ]

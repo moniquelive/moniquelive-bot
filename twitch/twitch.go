@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	_ "embed"
 	"fmt"
 	"math/rand"
 	"os"
@@ -186,7 +187,12 @@ func NewTwitch(username, oauth string, cmd *commands.Commands, amqpChannel *amqp
 
 		extras, _ := cmd.ActionExtras[action] // parametros extras do comando
 		for _, unparsedResponse := range responses {
-			parsedResponse, err := t.parseTemplate(message.User.Name, unparsedResponse, cmdLine, extras)
+			parsedResponse, err := t.parseTemplate(
+				message.User.ID,
+				message.User.Name,
+				unparsedResponse,
+				cmdLine,
+				extras)
 			if err != nil {
 				// TODO: tentar reproduzir esta condição de erro...
 				split := strings.Split(err.Error(), ": ")
@@ -205,7 +211,12 @@ func NewTwitch(username, oauth string, cmd *commands.Commands, amqpChannel *amqp
 			return
 		}
 		for _, unparsedLog := range logs {
-			parsedLog, err := t.parseTemplate(message.User.Name, unparsedLog, cmdLine, []string{})
+			parsedLog, err := t.parseTemplate(
+				message.User.ID,
+				message.User.Name,
+				unparsedLog,
+				cmdLine,
+				[]string{})
 			if err != nil {
 				log.Println("erro de template:", err)
 				return
@@ -252,6 +263,7 @@ func (t Twitch) Connect() error {
 }
 
 func (t Twitch) parseTemplate(
+	senderUserID,
 	senderUsername,
 	str,
 	cmdLine string,
@@ -261,12 +273,14 @@ func (t Twitch) parseTemplate(
 		Roster         Roster
 		Player         Player
 		SenderUsername string
+		SenderUserID   string
 		Commands       string
 		CmdLine        string
 		Extras         []string
 		Command        commands.Commands
 	}
 	vars.SenderUsername = senderUsername
+	vars.SenderUserID = senderUserID
 	vars.CmdLine = cmdLine
 	vars.Extras = extras
 	vars.Commands = t.cmd.Actions()
