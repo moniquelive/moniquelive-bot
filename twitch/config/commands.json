@@ -248,6 +248,7 @@
       "ajuda": "Mostra spec da lanhouse da Monique",
       "actions": [
         "!spec",
+        "!lanhouse",
         "!pc"
       ],
       "responses": [
@@ -572,6 +573,7 @@
         "!followage",
         "!follower",
         "!quandoseguiu",
+        "!segue",
         "!seguindo",
         "!seguidor",
         "!desde"
