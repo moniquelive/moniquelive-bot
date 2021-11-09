@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	irc "github.com/gempir/go-twitch-irc/v2"
 	"github.com/go-redis/redis"
 	"github.com/nicklaw5/helix"
 	"github.com/sirupsen/logrus"
@@ -25,7 +26,6 @@ type Commands struct {
 		Extras    []string `json:"extras"`
 		Ajuda     string   `json:"ajuda"`
 		Help      string   `json:"help"`
-		Admin     bool     `json:"admin"`
 	} `json:"commands"`
 	ActionResponses map[string][]string
 	ActionLogs      map[string][]string
@@ -43,6 +43,7 @@ const (
 	skipMusicTopicName     = "spotify_music_skip"
 	musicSkipPollName      = "twitch-bot:twitch:poll:skip_music"
 	musicKeepPollName      = "twitch-bot:twitch:poll:keep_music"
+	marqueeRedisKey        = "twitch-bot:twitch:marquee:contents"
 	MoniqueliveID          = "4930146"
 )
 
@@ -201,10 +202,15 @@ func (c Commands) Uptime(cmdLine string) string {
 		m.Truncate(time.Second))
 }
 
-func (c Commands) Marquee(cmdLine string) string {
+func (c Commands) Marquee(user *irc.User, cmdLine string) string {
+	if !isAdmin(user) {
+		return "Marquee > " + red.Get(marqueeRedisKey).Val()
+	}
 	if err := notifyAMQPTopic("marquee_updated", cmdLine); err != nil {
 		log.Errorln("Marquee > notifyAMQPTopic:", err)
+		return "Erro atualizando marquee: " + err.Error()
 	}
+	red.Set(marqueeRedisKey, cmdLine, 8*time.Hour)
 	return "Atualizando marquee: " + cmdLine
 }
 
@@ -236,8 +242,8 @@ func (c Commands) KeepMusic(username string) string {
 	return fmt.Sprintf("kumaPls parciais: (vaza: %v X fica: %v)", skipVotes, keepVotes)
 }
 
-func (c Commands) FollowAge(userID, userName string) string {
-	userID = strings.ToLower(userID)
+func (c Commands) FollowAge(user *irc.User) string {
+	userID := strings.ToLower(user.ID)
 	if userID == "" {
 		return c.Ajuda("followage")
 	}
@@ -274,11 +280,11 @@ func (c Commands) FollowAge(userID, userName string) string {
 	// responde
 	//
 	if len(resp.Data.Follows) == 0 {
-		return "Algo de errado não está certo " + userName + "..."
+		return "Algo de errado não está certo " + user.Name + "..."
 	}
 
 	duration := time.Since(resp.Data.Follows[0].FollowedAt)
-	return fmt.Sprintf("%s segue a monique live há %.2f dias", userName, duration.Hours()/24.0)
+	return fmt.Sprintf("%s segue a monique live há %.2f dias", user.Name, duration.Hours()/24.0)
 }
 
 func (c *Commands) Reload() {
@@ -304,7 +310,6 @@ func (c *Commands) refreshCache() {
 	for _, command := range c.Commands {
 		responses := command.Responses
 		extras := command.Extras
-		admin := command.Admin
 		actions := command.Actions
 		logs := command.Logs
 		ajuda := command.Ajuda
@@ -312,7 +317,6 @@ func (c *Commands) refreshCache() {
 		for _, action := range command.Actions {
 			c.ActionResponses[action] = responses
 			c.ActionExtras[action] = extras
-			c.ActionAdmin[action] = admin
 			c.ActionActions[action] = actions
 			c.ActionLogs[action] = logs
 			c.actionAjuda[action] = ajuda
@@ -331,6 +335,10 @@ func (c *Commands) Actions() string {
 	}
 	sort.Strings(sortedActions)
 	return strings.Join(sortedActions, " ")
+}
+
+func isAdmin(user *irc.User) bool {
+	return user.ID == MoniqueliveID
 }
 
 func actionLabel(actions []string) string {

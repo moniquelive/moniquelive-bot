@@ -440,7 +440,7 @@
       ],
       "responses": [
         "/color YellowGreen",
-        "/me {{ .Command.Uptime (or .CmdLine .SenderUsername) }}"
+        "/me {{ .Command.Uptime (or .CmdLine .Sender.Name) }}"
       ]
     },
     {
@@ -472,14 +472,13 @@
     {
       "help": "Updates the marquee",
       "ajuda": "Atualiza a mensagem rotativa",
-      "admin": true,
       "actions": [
         "!marquee",
         "!marq"
       ],
       "responses": [
         "/color YellowGreen",
-        "/me {{ .Command.Marquee .CmdLine }}"
+        "/me {{ .Command.Marquee .Sender .CmdLine }}"
       ]
     },
     {
@@ -545,7 +544,7 @@
       ],
       "responses": [
         "/color yellowgreen",
-        "/me {{ .Command.SkipMusic .SenderUsername }}"
+        "/me {{ .Command.SkipMusic .Sender.Name }}"
       ]
     },
     {
@@ -563,7 +562,7 @@
       ],
       "responses": [
         "/color yellowgreen",
-        "/me {{ .Command.KeepMusic .SenderUsername }}"
+        "/me {{ .Command.KeepMusic .Sender.Name }}"
       ]
     },
     {
@@ -580,7 +579,7 @@
       ],
       "responses": [
         "/color yellowgreen",
-        "/me {{ .Command.FollowAge .SenderUserID .SenderUsername }}"
+        "/me {{ .Command.FollowAge .Sender }}"
       ]
     }
   ]

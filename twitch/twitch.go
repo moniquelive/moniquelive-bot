@@ -188,8 +188,7 @@ func NewTwitch(username, oauth string, cmd *commands.Commands, amqpChannel *amqp
 		extras, _ := cmd.ActionExtras[action] // parametros extras do comando
 		for _, unparsedResponse := range responses {
 			parsedResponse, err := t.parseTemplate(
-				message.User.ID,
-				message.User.Name,
+				&message.User,
 				unparsedResponse,
 				cmdLine,
 				extras)
@@ -212,8 +211,7 @@ func NewTwitch(username, oauth string, cmd *commands.Commands, amqpChannel *amqp
 		}
 		for _, unparsedLog := range logs {
 			parsedLog, err := t.parseTemplate(
-				message.User.ID,
-				message.User.Name,
+				&message.User,
 				unparsedLog,
 				cmdLine,
 				[]string{})
@@ -263,24 +261,21 @@ func (t Twitch) Connect() error {
 }
 
 func (t Twitch) parseTemplate(
-	senderUserID,
-	senderUsername,
+	user *irc.User,
 	str,
 	cmdLine string,
 	extras []string,
 ) (_ string, err error) {
 	var vars struct {
-		Roster         Roster
-		Player         Player
-		SenderUsername string
-		SenderUserID   string
-		Commands       string
-		CmdLine        string
-		Extras         []string
-		Command        commands.Commands
+		Roster   Roster
+		Player   Player
+		Sender   *irc.User
+		Commands string
+		CmdLine  string
+		Extras   []string
+		Command  commands.Commands
 	}
-	vars.SenderUsername = senderUsername
-	vars.SenderUserID = senderUserID
+	vars.Sender = user
 	vars.CmdLine = cmdLine
 	vars.Extras = extras
 	vars.Commands = t.cmd.Actions()
