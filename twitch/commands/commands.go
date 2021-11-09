@@ -284,7 +284,7 @@ func (c Commands) FollowAge(user *irc.User) string {
 	}
 
 	duration := time.Since(resp.Data.Follows[0].FollowedAt)
-	return fmt.Sprintf("%s segue a monique live há %.2f dias", user.Name, duration.Hours()/24.0)
+	return fmt.Sprintf("%s segue a monique live há %s dias", user.Name, FormatDuration(duration))
 }
 
 func (c *Commands) Reload() {

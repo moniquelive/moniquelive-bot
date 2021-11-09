@@ -1,8 +1,10 @@
 package commands
 
 import (
+	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/streadway/amqp"
 )
@@ -44,6 +46,44 @@ func Remove(elem string, slice []string) (newSlice []string) {
 		if elem != e {
 			newSlice = append(newSlice, e)
 		}
+	}
+	return
+}
+
+func FormatDuration(duration time.Duration) (format string) {
+	plural := func(plural bool, prefix string) string {
+		if !plural {
+			return prefix
+		}
+		if strings.HasSuffix(prefix, "s") {
+			return prefix + "es"
+		}
+		return prefix + "s"
+	}
+	for _, p := range []struct {
+		millis time.Duration
+		label  string
+	}{
+		{30 * 24 * time.Hour, "mes"},
+		{24 * time.Hour, "dia"},
+		{time.Hour, "hora"},
+		{time.Minute, "minuto"},
+	} {
+		if duration >= p.millis {
+			if format != "" {
+				format += ", "
+			}
+			partial := duration / p.millis
+			format += fmt.Sprintf("%d %s", partial, plural(partial > 1, p.label))
+			duration -= partial * p.millis
+		}
+	}
+	seconds := duration / time.Second
+	if seconds > 0 {
+		if format != "" {
+			format += " e "
+		}
+		format += fmt.Sprintf("%d %s", seconds, plural(seconds > 1, "segundo"))
 	}
 	return
 }

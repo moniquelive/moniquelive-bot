@@ -2,6 +2,7 @@ package commands_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/moniquelive/moniquelive-bot/twitch/commands"
 	"github.com/stretchr/testify/assert"
@@ -73,6 +74,35 @@ func TestRemove(t *testing.T) {
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
 			actual := commands.Remove(tc.token, tc.slice)
+			assert.Equal(t, tc.expected, actual)
+		})
+	}
+}
+
+func TestFormatDuration(t *testing.T) {
+	var tt = []struct {
+		name     string
+		duration time.Duration
+		expected string
+	}{
+		{"1 second", time.Second, "1 segundo"},
+		{"10 seconds", 10 * time.Second, "10 segundos"},
+		{"1 minute", time.Minute, "1 minuto"},
+		{"5 minutes", 5 * time.Minute, "5 minutos"},
+		{"10 minutes and 30 seconds", 10*time.Minute + 30*time.Second, "10 minutos e 30 segundos"},
+		{"3 hours, 19 minutes and 7 seconds",
+			3*time.Hour + 19*time.Minute + 7*time.Second,
+			"3 horas, 19 minutos e 7 segundos"},
+		{"11 days, 3 hours, 19 minutes and 7 seconds",
+			11*24*time.Hour + 3*time.Hour + 19*time.Minute + 7*time.Second,
+			"11 dias, 3 horas, 19 minutos e 7 segundos"},
+		{"5 months, 11 days, 3 hours, 19 minutes and 7 seconds",
+			5*30*24*time.Hour + 11*24*time.Hour + 3*time.Hour + 19*time.Minute + 7*time.Second,
+			"5 meses, 11 dias, 3 horas, 19 minutos e 7 segundos"},
+	}
+	for _, tc := range tt {
+		t.Run(tc.name, func(t *testing.T) {
+			actual := commands.FormatDuration(tc.duration)
 			assert.Equal(t, tc.expected, actual)
 		})
 	}
