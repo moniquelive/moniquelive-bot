@@ -44,6 +44,7 @@ const (
 	musicSkipPollName      = "twitch-bot:twitch:poll:skip_music"
 	musicKeepPollName      = "twitch-bot:twitch:poll:keep_music"
 	marqueeRedisKey        = "twitch-bot:twitch:marquee:contents"
+	appAccessTokenRedisKey = "twitch-bot:twitch:app:access_token"
 	MoniqueliveID          = "4930146"
 )
 
@@ -259,12 +260,19 @@ func (c Commands) FollowAge(user *irc.User) string {
 	if err != nil {
 		return "Erro no login: " + err.Error()
 	}
-	var authResp *helix.AppAccessTokenResponse
-	authResp, err = client.RequestAppAccessToken(nil)
+
+	accessToken := red.Get(appAccessTokenRedisKey).Val()
+	if accessToken == "" {
+		var authResp *helix.AppAccessTokenResponse
+		authResp, err = client.RequestAppAccessToken(nil)
+		accessToken = authResp.Data.AccessToken
+		red.Set(appAccessTokenRedisKey, accessToken, time.Duration(authResp.Data.ExpiresIn)*time.Second)
+	}
+
 	if err != nil {
 		return "Erro no access token: " + err.Error()
 	}
-	client.SetAppAccessToken(authResp.Data.AccessToken)
+	client.SetAppAccessToken(accessToken)
 	//
 	// pega tempo de seguida
 	//
