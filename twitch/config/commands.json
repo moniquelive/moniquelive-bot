@@ -582,6 +582,22 @@
         "/color yellowgreen",
         "/me {{ .Command.FollowAge .Sender }}"
       ]
+    },
+    {
+      "help": "Send hugs <3",
+      "ajuda": "Abraça o Amiguine <3",
+      "actions": [
+        "!hug",
+        "!hugs",
+        "!abraco",
+        "!abraço",
+        "!abraca",
+        "!abraça"
+      ],
+      "responses": [
+        "/color yellowgreen",
+        "/me {{ .Command.Hug .Sender (or .CmdLine (random .Roster.Keys)) }}"
+      ]
     }
   ]
 }

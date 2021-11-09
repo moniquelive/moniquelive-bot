@@ -345,6 +345,20 @@ func (c *Commands) Actions() string {
 	return strings.Join(sortedActions, " ")
 }
 
+func (c Commands) Hug(sender *irc.User, cmdLine string) string {
+	if cmdLine == "" {
+		return c.Ajuda("hug")
+	}
+	lowerCmdLine := strings.ToLower(cmdLine)
+	if strings.HasPrefix(lowerCmdLine, "@") {
+		lowerCmdLine = lowerCmdLine[1:]
+	}
+	if  lowerCmdLine == strings.ToLower(sender.Name) {
+		return fmt.Sprintf("♥ %s se auto-abraça 02Pat", sender.Name)
+	}
+	return fmt.Sprintf("♥ %s abraça %s 02Pat", sender.Name, cmdLine)
+}
+
 func isAdmin(user *irc.User) bool {
 	return user.ID == MoniqueliveID
 }
