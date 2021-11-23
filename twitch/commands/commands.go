@@ -37,15 +37,17 @@ type Commands struct {
 }
 
 const (
-	redisUrlsKeyPrefix     = "twitch-bot:twitch_stats:urls:"
-	redisSeenAtKeyPrefix   = "twitch-bot:twitch_stats:seen_at:"
-	redisKeyCommandsPrefix = "twitch-bot:twitch_stats:command:"
-	skipMusicTopicName     = "spotify_music_skip"
-	musicSkipPollName      = "twitch-bot:twitch:poll:skip_music"
-	musicKeepPollName      = "twitch-bot:twitch:poll:keep_music"
-	marqueeRedisKey        = "twitch-bot:twitch:marquee:contents"
-	appAccessTokenRedisKey = "twitch-bot:twitch:app:access_token"
-	MoniqueliveID          = "4930146"
+	redisUrlsKeyPrefix       = "twitch-bot:twitch_stats:urls:"
+	redisSeenAtKeyPrefix     = "twitch-bot:twitch_stats:seen_at:"
+	redisKeyCommandsPrefix   = "twitch-bot:twitch_stats:command:"
+	skipMusicTopicName       = "spotify_music_skip"
+	musicSkipPollName        = "twitch-bot:twitch:poll:skip_music"
+	musicKeepPollName        = "twitch-bot:twitch:poll:keep_music"
+	marqueeRedisKey          = "twitch-bot:twitch:marquee:contents"
+	appAccessTokenRedisKey   = "twitch-bot:twitch:app:access_token"
+	userAccessTokenRedisKey  = "twitch-bot:twitch:user:access_token"
+	userRefreshTokenRedisKey = "twitch-bot:twitch:user:refresh_token"
+	MoniqueliveID            = "4930146"
 )
 
 var (
@@ -212,6 +214,17 @@ func (c Commands) Marquee(user *irc.User, cmdLine string) string {
 		return "Erro atualizando marquee: " + err.Error()
 	}
 	red.Set(marqueeRedisKey, cmdLine, 8*time.Hour)
+	client, err := authHelix()
+	if err != nil {
+		return "Erro autenticando helix: " + err.Error()
+	}
+	_, err = client.EditChannelInformation(&helix.EditChannelInformationParams{
+		BroadcasterID: MoniqueliveID,
+		Title:         cmdLine,
+	})
+	if err != nil {
+		return "Erro no EditChannelInformation: " + err.Error()
+	}
 	return "Atualizando marquee: " + cmdLine
 }
 
@@ -248,31 +261,10 @@ func (c Commands) FollowAge(user *irc.User) string {
 	if userID == "" {
 		return c.Ajuda("followage")
 	}
-	//
-	// autentica
-	//
-	var err error
-	var client *helix.Client
-	client, err = helix.NewClient(&helix.Options{
-		ClientID:     oauth_client_id,
-		ClientSecret: oauth_client_secret,
-	})
+	client, err := authHelix()
 	if err != nil {
-		return "Erro no login: " + err.Error()
+		return "Erro autenticando helix: " + err.Error()
 	}
-
-	accessToken := red.Get(appAccessTokenRedisKey).Val()
-	if accessToken == "" {
-		var authResp *helix.AppAccessTokenResponse
-		authResp, err = client.RequestAppAccessToken(nil)
-		accessToken = authResp.Data.AccessToken
-		red.Set(appAccessTokenRedisKey, accessToken, time.Duration(authResp.Data.ExpiresIn)*time.Second)
-	}
-
-	if err != nil {
-		return "Erro no access token: " + err.Error()
-	}
-	client.SetAppAccessToken(accessToken)
 	//
 	// pega tempo de seguida
 	//
@@ -353,10 +345,49 @@ func (c Commands) Hug(sender *irc.User, cmdLine string) string {
 	if strings.HasPrefix(lowerCmdLine, "@") {
 		lowerCmdLine = lowerCmdLine[1:]
 	}
-	if  lowerCmdLine == strings.ToLower(sender.Name) {
+	if lowerCmdLine == strings.ToLower(sender.Name) {
 		return fmt.Sprintf("♥ %s se auto-abraça 02Pat", sender.Name)
 	}
 	return fmt.Sprintf("♥ %s abraça %s 02Pat", sender.Name, cmdLine)
+}
+
+func authHelix() (client *helix.Client, err error) {
+	client, err = helix.NewClient(&helix.Options{
+		ClientID:     oauth_client_id,
+		ClientSecret: oauth_client_secret,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("erro no login: %v", err)
+	}
+
+	appAccessToken := red.Get(appAccessTokenRedisKey).Val()
+	if appAccessToken == "" {
+		var resp *helix.AppAccessTokenResponse
+		resp, err = client.RequestAppAccessToken([]string{"channel:manage:broadcast"})
+
+		if err != nil {
+			return nil, fmt.Errorf("erro no access token: %v", err)
+		}
+		appAccessToken = resp.Data.AccessToken
+		red.Set(appAccessTokenRedisKey, appAccessToken, time.Duration(resp.Data.ExpiresIn)*time.Second)
+	}
+
+	userAccessToken := red.Get(userAccessTokenRedisKey).Val()
+	if userAccessToken == "" {
+		userRefreshToken := red.Get(userRefreshTokenRedisKey).Val()
+		var resp *helix.RefreshTokenResponse
+		resp, err = client.RefreshUserAccessToken(userRefreshToken)
+		if err != nil {
+			return nil, fmt.Errorf("erro refreshing token: %v", err)
+		}
+		userAccessToken = resp.Data.AccessToken
+		red.Set(userAccessTokenRedisKey, userAccessToken, time.Duration(resp.Data.ExpiresIn)*time.Second)
+		red.Set(userRefreshTokenRedisKey, resp.Data.RefreshToken, 0)
+	}
+
+	client.SetAppAccessToken(appAccessToken)
+	client.SetUserAccessToken(userAccessToken)
+	return
 }
 
 func isAdmin(user *irc.User) bool {
