@@ -19,8 +19,8 @@ const (
 )
 
 var (
-	amqpURL  = os.Getenv("RABBITMQ_URL")
-	log      = logrus.WithField("package", "main")
+	amqpURL = os.Getenv("RABBITMQ_URL")
+	log     = logrus.WithField("package", "main")
 )
 
 func init() {
@@ -154,7 +154,7 @@ func handle(deliveries <-chan amqp.Delivery, channel *amqp.Channel, done chan<- 
 				break
 			}
 			log.Infoln("DELIVERY:", message)
-			resp := tts(ws, responses, message, "perola")
+			resp := tts(ws, responses, message, "guilherme")
 			if !resp.Payload.Success {
 				log.Println("!Success:", resp.Payload.Reason)
 				return
