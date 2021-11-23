@@ -485,7 +485,8 @@
       "help": "OO video",
       "ajuda": "Vídeo sobre OO",
       "actions": [
-        "!oo"
+        "!oo",
+        "!poo"
       ],
       "responses": [
         "/color yellowgreen",
@@ -554,6 +555,9 @@
         "!noskip",
         "!naopula",
         "!fica",
+        "!amaiorquenostemos",
+        "!amaiorquetemos",
+        "!amaior",
         "!gostei",
         "!gosto",
         "!deixa",
@@ -597,6 +601,20 @@
       "responses": [
         "/color yellowgreen",
         "/me {{ .Command.Hug .Sender (or .CmdLine (random .Roster.Keys)) }}"
+      ]
+    },
+    {
+      "help": "Show my dotfiles url",
+      "ajuda": "Mostra a url dos dotfiles da Mo",
+      "actions": [
+        "!dotfile",
+        "!dot",
+        "!cfg",
+        "!config"
+      ],
+      "responses": [
+        "/color YellowGreen",
+        "/me meus dotfiles: https://github.com/moniquelive/dotfiles/"
       ]
     }
   ]
