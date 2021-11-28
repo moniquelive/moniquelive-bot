@@ -218,9 +218,17 @@ func (c Commands) Marquee(user *irc.User, cmdLine string) string {
 	if err != nil {
 		return "Erro autenticando helix: " + err.Error()
 	}
+	channelInformation, err := client.GetChannelInformation(&helix.GetChannelInformationParams{
+		BroadcasterIDs: []string{MoniqueliveID},
+	})
+	if err != nil {
+		return "Erro no GetChannelInformation: " + err.Error()
+	}
 	_, err = client.EditChannelInformation(&helix.EditChannelInformationParams{
-		BroadcasterID: MoniqueliveID,
-		Title:         cmdLine,
+		BroadcasterID:       MoniqueliveID,
+		GameID:              channelInformation.Data.Channels[0].GameID,
+		BroadcasterLanguage: channelInformation.Data.Channels[0].BroadcasterLanguage,
+		Title:               cmdLine,
 	})
 	if err != nil {
 		return "Erro no EditChannelInformation: " + err.Error()
