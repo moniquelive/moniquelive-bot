@@ -221,6 +221,8 @@
       "actions": [
         "!spotify",
         "!playlist",
+        "!pl",
+        "!sl",
         "!list"
       ],
       "responses": [
