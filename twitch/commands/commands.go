@@ -5,11 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/rand"
+	"net/url"
 	"os"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/moniquelive/moniquelive-bot/twitch/spotify"
 
 	irc "github.com/gempir/go-twitch-irc/v2"
 	"github.com/go-redis/redis"
@@ -37,17 +40,19 @@ type Commands struct {
 }
 
 const (
-	redisUrlsKeyPrefix       = "twitch-bot:twitch_stats:urls:"
-	redisSeenAtKeyPrefix     = "twitch-bot:twitch_stats:seen_at:"
-	redisKeyCommandsPrefix   = "twitch-bot:twitch_stats:command:"
-	skipMusicTopicName       = "spotify_music_skip"
-	musicSkipPollName        = "twitch-bot:twitch:poll:skip_music"
-	musicKeepPollName        = "twitch-bot:twitch:poll:keep_music"
-	marqueeRedisKey          = "twitch-bot:twitch:marquee:contents"
-	appAccessTokenRedisKey   = "twitch-bot:twitch:app:access_token"
-	userAccessTokenRedisKey  = "twitch-bot:twitch:user:access_token"
-	userRefreshTokenRedisKey = "twitch-bot:twitch:user:refresh_token"
-	MoniqueliveID            = "4930146"
+	redisUrlsKeyPrefix              = "twitch-bot:twitch_stats:urls:"
+	redisSeenAtKeyPrefix            = "twitch-bot:twitch_stats:seen_at:"
+	redisKeyCommandsPrefix          = "twitch-bot:twitch_stats:command:"
+	skipMusicTopicName              = "spotify_music_skip"
+	musicSkipPollName               = "twitch-bot:twitch:poll:skip_music"
+	musicKeepPollName               = "twitch-bot:twitch:poll:keep_music"
+	marqueeRedisKey                 = "twitch-bot:twitch:marquee:contents"
+	appAccessTokenRedisKey          = "twitch-bot:twitch:app:access_token"
+	userAccessTokenRedisKey         = "twitch-bot:twitch:user:access_token"
+	userRefreshTokenRedisKey        = "twitch-bot:twitch:user:refresh_token"
+	spotifyUserAccessTokenRedisKey  = "twitch-bot:spotify:user:access_token"
+	spotifyUserRefreshTokenRedisKey = "twitch-bot:spotify:user:refresh_token"
+	MoniqueliveID                   = "4930146"
 )
 
 var (
@@ -67,6 +72,12 @@ var (
 
 	//go:embed .oauth_client_secret
 	oauth_client_secret string
+
+	//go:embed .spotify_client_id
+	spotify_client_id string
+
+	//go:embed .spotify_client_secret
+	spotify_client_secret string
 )
 
 func init() {
@@ -85,8 +96,7 @@ func init() {
 
 	red = redis.NewClient(&redis.Options{Addr: redisURL})
 	if _, err := red.Ping().Result(); err != nil {
-		log.Println("Commands.init > Sem redis...")
-		red = nil
+		log.Fatalln("Commands.init > Sem redis...")
 	}
 }
 
@@ -359,6 +369,41 @@ func (c Commands) Hug(sender *irc.User, cmdLine string) string {
 	return fmt.Sprintf("♥ %s abraça %s 02Pat", sender.Name, cmdLine)
 }
 
+func (c Commands) SongRequest(user *irc.User, songUrl string) string {
+	client, err := authSpotify()
+	if err != nil {
+		return "Erro autenticando spotify: " + err.Error()
+	}
+
+	parsedUrl, err := url.Parse(songUrl)
+	if err != nil {
+		return "Música não encontrada:" + err.Error()
+	}
+	split := strings.Split(parsedUrl.Path, "/")
+	songId := split[len(split)-1]
+
+	songInfo, err := client.GetSongInfo(songId)
+	if err != nil {
+		return "Música não encontrada:" + err.Error()
+	}
+
+	if err = client.EnqueueSong(songId); err != nil {
+		return "Música não encontrada:" + err.Error()
+	}
+	return fmt.Sprintf("Enfileirando %q by %q - @%v",
+		songInfo.Name,
+		formattedArtists(songInfo),
+		user.DisplayName)
+}
+
+func formattedArtists(info *spotify.SongInfoResponse) string {
+	var artists []string
+	for _, artist := range info.Artists {
+		artists = append(artists, artist.Name)
+	}
+	return strings.Join(artists, ",")
+}
+
 func authHelix() (client *helix.Client, err error) {
 	client, err = helix.NewClient(&helix.Options{
 		ClientID:     oauth_client_id,
@@ -394,6 +439,31 @@ func authHelix() (client *helix.Client, err error) {
 	}
 
 	client.SetAppAccessToken(appAccessToken)
+	client.SetUserAccessToken(userAccessToken)
+	return
+}
+
+func authSpotify() (client *spotify.Client, err error) {
+	client, err = spotify.NewClient(&spotify.Options{
+		ClientID:     spotify_client_id,
+		ClientSecret: spotify_client_secret,
+	})
+	if err != nil {
+		return nil, err
+	}
+	// get access token
+	userAccessToken := red.Get(spotifyUserAccessTokenRedisKey).Val()
+	if userAccessToken == "" {
+		userRefreshToken := red.Get(spotifyUserRefreshTokenRedisKey).Val()
+		var resp *spotify.RefreshTokenResponse
+		resp, err = client.RefreshUserAccessToken(userRefreshToken)
+		if err != nil {
+			return nil, fmt.Errorf("erro refreshing token: %v", err)
+		}
+		userAccessToken = resp.AccessToken
+		red.Set(spotifyUserAccessTokenRedisKey, userAccessToken, time.Duration(resp.ExpiresIn)*time.Second)
+	}
+
 	client.SetUserAccessToken(userAccessToken)
 	return
 }

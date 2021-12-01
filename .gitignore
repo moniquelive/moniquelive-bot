@@ -1,4 +1,5 @@
 .oauth*
+.spotify*
 vox_client_*
 
 .idea
