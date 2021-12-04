@@ -166,6 +166,9 @@ func (c Commands) Urls(cmdLine string) []string {
 	if username == "" {
 		username = "*"
 	}
+	if username[0] == '@' {
+		username = username[1:]
+	}
 	allUsersRedisKeys := red.Keys(redisUrlsKeyPrefix + username).Val()
 	if len(allUsersRedisKeys) == 0 {
 		if username == "*" {
