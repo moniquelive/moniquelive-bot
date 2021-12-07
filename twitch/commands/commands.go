@@ -186,6 +186,7 @@ func (c Commands) Urls(cmdLine string) []string {
 			continue
 		}
 		urls := red.LRange(redisUrlsKeyPrefix+username, 0, -1).Val()
+		urls = filterUrls(urls)
 		if len(urls) > 0 {
 			response = append(response,
 				username+" compartilhou: "+strings.Join(urls, " "))
@@ -195,6 +196,16 @@ func (c Commands) Urls(cmdLine string) []string {
 		return []string{"Estranhaço... :S"}
 	}
 	return WordWrap(strings.Join(response, " - "), 500)
+}
+
+func filterUrls(urls []string) (uu []string) {
+	for _, u := range urls {
+		if strings.Contains(u, "open.spotify.com") {
+			continue
+		}
+		uu = append(uu, u)
+	}
+	return
 }
 
 func (c Commands) Uptime(cmdLine string) string {
