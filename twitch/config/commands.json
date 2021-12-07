@@ -631,21 +631,6 @@
         "/color YellowGreen",
         "/me meus dotfiles: https://github.com/moniquelive/dotfiles/"
       ]
-    },
-    {
-      "help": "Adds music to queue",
-      "ajuda": "Adiciona música na fila",
-      "actions": [
-        "!songrequest",
-        "!tocaessa",
-        "!toca",
-        "!play",
-        "!sr"
-      ],
-      "responses": [
-        "/color YellowGreen",
-        "/me {{ .Command.SongRequest .Sender .CmdLine }}"
-      ]
     }
   ]
 }

@@ -22,6 +22,7 @@ const (
 	channel                = "moniquelive"
 	streamlabsID           = "105166207"
 	TtsReward              = "e706421e-01f7-48fd-a4c6-4393d1ba4ec8"
+	SpotifyReward          = "bf07c491-1ffb-4eb7-a7d8-5c9f2fe51818"
 	redisKey               = "twitch-bot:dbus:song-info"
 	twitchMessageTopicName = "twitch_message_delivered"
 )
@@ -134,6 +135,13 @@ func NewTwitch(username, oauth string, cmd *commands.Commands, amqpChannel *amqp
 			if err != nil {
 				log.Errorln("client.OnPrivateMessage > amqpChannel.Publish:", err)
 			}
+			return
+		}
+		//
+		// ve se é o comando do Spotify (channel points)
+		//
+		if rewardID, ok := message.Tags["custom-reward-id"]; ok && rewardID == SpotifyReward {
+			t.Say(cmd.SongRequest(&message.User, message.Message))
 			return
 		}
 
