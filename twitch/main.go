@@ -36,7 +36,7 @@ var (
 
 func init() {
 	logrus.SetFormatter(&logrus.TextFormatter{
-		ForceColors: true,
+		ForceColors:     true,
 		FullTimestamp:   true,
 		TimestampFormat: time.StampMilli,
 	})
@@ -153,8 +153,9 @@ func handle(deliveries <-chan amqp.Delivery, client *Twitch) {
 			continue
 		}
 		client.Say("/color Chocolate")
-		client.Say(fmt.Sprintf("/me %v - %v - %v - %v (%vs)",
-			songInfo.Artist, songInfo.Title, songInfo.ImgUrl, songInfo.SongUrl, songInfo.Length))
+		client.Say(fmt.Sprintf("/me %v - %v - %v - %v (%v)",
+			songInfo.Artist, songInfo.Title, songInfo.ImgUrl, songInfo.SongUrl,
+			commands.FormatDuration(time.Duration(songInfo.Length)*time.Second)))
 
 		createPoll(songInfo.Length)
 	}
