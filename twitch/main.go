@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/go-redis/redis"
@@ -154,7 +155,8 @@ func handle(deliveries <-chan amqp.Delivery, client *Twitch) {
 		}
 		client.Say("/color Chocolate")
 		client.Say(fmt.Sprintf("/me %v - %v - %v - %v (%v)",
-			songInfo.Artist, songInfo.Title, songInfo.ImgUrl, songInfo.SongUrl,
+			songInfo.Artist, songInfo.Title, songInfo.ImgUrl,
+			strings.ReplaceAll(songInfo.SongUrl, "https://open.spotify.com/track/", "https://song.link/s/"),
 			commands.FormatDuration(time.Duration(songInfo.Length)*time.Second)))
 
 		createPoll(songInfo.Length)
