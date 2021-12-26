@@ -71,8 +71,9 @@ func (p Player) CurrentSong() string {
 		log.Errorln("CurrentSong.Unmarshal:", err)
 		return "sem músicas no momento..."
 	}
-	return fmt.Sprintf("%v - %v - %v - %v",
-		songInfo.Artist, songInfo.Title, songInfo.ImgUrl, songInfo.SongUrl)
+	return fmt.Sprintf("%v - %v - %v",
+		songInfo.Artist, songInfo.Title,
+		strings.ReplaceAll(songInfo.SongUrl, "https://open.spotify.com/track/", "https://song.link/s/"))
 }
 
 func NewTwitch(username, oauth string, cmd *commands.Commands, amqpChannel *amqp.Channel) (*Twitch, error) {
