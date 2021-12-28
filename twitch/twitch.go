@@ -122,27 +122,7 @@ func NewTwitch(username, oauth string, cmd *commands.Commands, amqpChannel *amqp
 		// atualiza contadores do !cmds
 		//
 		publishTwitchMessage(t.amqpChannel, message.Raw)
-		//
-		// ve se é o comando da pérola (channel points)
-		//
-		if rewardID, ok := message.Tags["custom-reward-id"]; ok && rewardID == TtsReward {
-			err := t.amqpChannel.Publish("amq.topic", createTtsTopicName, false, false, amqp.Publishing{
-				ContentType:     "text/plain",
-				ContentEncoding: "utf-8",
-				DeliveryMode:    2,
-				Expiration:      "60000",
-				Body:            []byte(message.Message),
-			})
-			if err != nil {
-				log.Errorln("client.OnPrivateMessage > amqpChannel.Publish:", err)
-			}
-			return
-		}
-		//
-		// ve se é o comando do Spotify (channel points)
-		//
-		if rewardID, ok := message.Tags["custom-reward-id"]; ok && rewardID == SpotifyReward {
-			t.Say(cmd.SongRequest(&message.User, message.Message))
+		if leaveEarly := t.isTwitchRewards(message, cmd); leaveEarly {
 			return
 		}
 
@@ -234,6 +214,33 @@ func NewTwitch(username, oauth string, cmd *commands.Commands, amqpChannel *amqp
 
 	client.Join(channel)
 	return t, nil
+}
+
+func (t Twitch) isTwitchRewards(message irc.PrivateMessage, cmd *commands.Commands) bool {
+	//
+	// ve se é o comando da pérola
+	//
+	if rewardID, ok := message.Tags["custom-reward-id"]; ok && rewardID == TtsReward {
+		err := t.amqpChannel.Publish("amq.topic", createTtsTopicName, false, false, amqp.Publishing{
+			ContentType:     "text/plain",
+			ContentEncoding: "utf-8",
+			DeliveryMode:    2,
+			Expiration:      "60000",
+			Body:            []byte(message.Message),
+		})
+		if err != nil {
+			log.Errorln("client.OnPrivateMessage > amqpChannel.Publish:", err)
+		}
+		return true
+	}
+	//
+	// ve se é o comando do Spotify
+	//
+	if rewardID, ok := message.Tags["custom-reward-id"]; ok && rewardID == SpotifyReward {
+		t.Say(cmd.SongRequest(&message.User, message.Message))
+		return true
+	}
+	return false
 }
 
 func (t Twitch) antivirus(message irc.PrivateMessage) {
