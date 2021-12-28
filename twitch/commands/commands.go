@@ -404,9 +404,10 @@ func (c Commands) SongRequest(user *irc.User, songUrl string) string {
 	if err = client.EnqueueSong(songId); err != nil {
 		return "Música não encontrada:" + err.Error()
 	}
-	return fmt.Sprintf("Enfileirando %q by %q - @%v",
+	return fmt.Sprintf("Enfileirando %q by %q (%v) - @%v",
 		songInfo.Name,
 		formattedArtists(songInfo),
+		FormatDuration(time.Duration(songInfo.DurationMs)*time.Millisecond),
 		user.DisplayName)
 }
 
