@@ -13,3 +13,4 @@ CODE= \
                 -d grant_type=authorization_code \
                 -XPOST "https://accounts.spotify.com/api/token"
 
+** LEMBRAR DE SETAR O TTL DO ACCESS_KEY **
