@@ -536,6 +536,7 @@
       "actions": [
         "!skip",
         "!pula",
+        "!apioral",
         "!apiorquenostemos",
         "!opiorquenostemos",
         "!amenorquenostemos",
