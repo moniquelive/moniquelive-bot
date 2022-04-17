@@ -1,5 +1,9 @@
 # Moniquelive_Bot
 
+## BUG
+
+- theminerr_ segue a monique live há 10 meses, 24 dias, 19 horas, 47 minutos e 31 segundos dias 
+
 ## Links
 
 - lib: https://github.com/gempir/go-twitch-irc

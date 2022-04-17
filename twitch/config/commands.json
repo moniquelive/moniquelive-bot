@@ -623,6 +623,7 @@
       "help": "Show my dotfiles url",
       "ajuda": "Mostra a url dos dotfiles da Mo",
       "actions": [
+        "!dotfiles",
         "!dotfile",
         "!dot",
         "!cfg",
