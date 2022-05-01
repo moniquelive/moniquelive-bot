@@ -242,7 +242,7 @@
       ],
       "responses": [
         "/color YellowGreen",
-        "/me Pop OS v21.10 (https://pop.system76.com/)"
+        "/me Pop OS v22.04 (https://pop.system76.com/)"
       ]
     },
     {
@@ -260,7 +260,7 @@
         "/color SpringGreen", "/me [SSD] Samsung 970 EVO Plus (2TB)",
         "/color YellowGreen", "/me [Teclado] https://ergodox-ez.com/",
         "/color SpringGreen", "/me [Mouse] Logitech MX Master 3",
-        "/color YellowGreen", "/me [Monitores] Dell UP3216Q && LG HDR 4K",
+        "/color YellowGreen", "/me [Monitores] Dell UP3216Q && LG HDR 4K (x2)",
         "/color SpringGreen", "/me [Câmera] GoPro Hero 9 && Logitech Brio 4K",
         "/color YellowGreen", "/me [Microfone] Shure Inc. MV7",
         "/color SpringGreen", "/me [iPad] as vezes para escrevinhar na tela..."
@@ -633,6 +633,19 @@
         "/color YellowGreen",
         "/me meus dotfiles: https://github.com/moniquelive/dotfiles/"
       ]
+    },
+    {
+      "help": "Show my blog",
+      "ajuda": "Mostra a url do meu blog",
+      "actions": [
+        "!blog",
+        "!site"
+      ],
+      "responses": [
+        "/color YellowGreen",
+        "/me meus artigos traduzidos: https://monique.dev/"
+      ]
     }
+
   ]
 }
