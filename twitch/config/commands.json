@@ -600,7 +600,7 @@
       ],
       "responses": [
         "/color yellowgreen",
-        "/me {{ .Command.FollowAge .Sender }}"
+        "/me {{ .Command.FollowAge .CmdLine .Sender }}"
       ]
     },
     {

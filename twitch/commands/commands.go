@@ -288,14 +288,19 @@ func (c Commands) KeepMusic(username string) string {
 	return fmt.Sprintf("kumaPls parciais: (vaza: %v X fica: %v)", skipVotes, keepVotes)
 }
 
-func (c Commands) FollowAge(user *irc.User) string {
-	userID := strings.ToLower(user.ID)
-	if userID == "" {
-		return c.Ajuda("followage")
+func (c Commands) FollowAge(cmdLine string, sender *irc.User) string {
+	if len(cmdLine) > 1 && cmdLine[0] == '@' {
+		cmdLine = cmdLine[1:]
 	}
 	client, err := authHelix()
 	if err != nil {
 		return "Erro autenticando helix: " + err.Error()
+	}
+	userID := sender.ID
+	userName := sender.Name
+	if users, err := client.GetUsers(&helix.UsersParams{Logins: []string{cmdLine}}); err == nil && len(users.Data.Users) == 1 {
+		userID = users.Data.Users[0].ID
+		userName = users.Data.Users[0].DisplayName
 	}
 	//
 	// pega tempo de seguida
@@ -312,11 +317,11 @@ func (c Commands) FollowAge(user *irc.User) string {
 	// responde
 	//
 	if len(resp.Data.Follows) == 0 {
-		return "Algo de errado não está certo " + user.Name + "..."
+		return userName + " não segue a Monique..."
 	}
 
 	duration := time.Since(resp.Data.Follows[0].FollowedAt)
-	return fmt.Sprintf("%s segue a monique live há %s dias", user.Name, FormatDuration(duration))
+	return userName + " segue a Monique há " + FormatDuration(duration)
 }
 
 func (c *Commands) Reload() {
